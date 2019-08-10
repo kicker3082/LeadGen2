@@ -5,6 +5,11 @@ VisualStudioVersion = 15.0.28307.645
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ServiceBusMessages", "ServiceBusMessages\ServiceBusMessages.csproj", "{40D61605-92D0-49D6-AE23-E3BF0576321B}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "TestData", "TestData", "{E3E14C10-3844-4704-9C7A-B6F71489A340}"
+	ProjectSection(SolutionItems) = preProject
+		TestData\20190808.zip = TestData\20190808.zip
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
