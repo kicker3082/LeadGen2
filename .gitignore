@@ -5,3 +5,5 @@
 /ServiceBusMessages/obj
 /.vs/LeadGen2/v15/Server/sqlite3
 /.vs
+/MassIdxIngestion/obj
+/MassIdxIngestion.Tests/obj
