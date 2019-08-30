@@ -9,6 +9,5 @@ namespace Scraper.Core
         public IEnumerable<string> LinksInPage { get; set; }
         public int? HttpErrorCode { get; set; }
         public CrawlerPageNode Parent { get; set; }
-        public IEnumerable<CrawlerPageNode> Children { get; set; }
     }
 }

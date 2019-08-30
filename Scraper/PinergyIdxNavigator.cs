@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.CompilerServices;
+using System.Threading;
 using System.Threading.Tasks;
 using Scraper.Core;
 
@@ -10,6 +12,8 @@ namespace Scraper
     {
         private readonly IWebClient _webClient;
         private readonly INavigationLinkParser _navigationLinkParser;
+        AsyncQueue<(string link, CrawlerPageNode parent)> _links;
+        bool _isDone;
 
         public PinergyIdxCrawler(
             IWebClient webClient,
@@ -17,6 +21,8 @@ namespace Scraper
         {
             _webClient = webClient ?? throw new ArgumentNullException(nameof(webClient));
             _navigationLinkParser = navigationLinkParser ?? throw new ArgumentNullException(nameof(navigationLinkParser));
+
+            _links = new AsyncQueue<(string, CrawlerPageNode)>();
         }
 
         /// <summary>
@@ -43,7 +49,7 @@ namespace Scraper
         IEnumerable<CrawlerPageNode> ICrawler.CrawlWeb(string startingUrl)
         {
             CheckUrl(startingUrl);
-            return ((ICrawler)this).CrawlWebAsync(startingUrl).Result;
+            return (IEnumerable<CrawlerPageNode>)((ICrawler)this).CrawlWebAsync(startingUrl);
         }
 
         /// <summary>
@@ -69,10 +75,24 @@ namespace Scraper
         /// item maintains the hierarchal relationships.
         /// </remarks>
 
-        async Task<IEnumerable<CrawlerPageNode>> ICrawler.CrawlWebAsync(string startingUrl)
+        async IAsyncEnumerable<CrawlerPageNode> ICrawler.CrawlWebAsync(string startingUrl, 
+            [EnumeratorCancellation] CancellationToken cancellationToken = default)
         {
             CheckUrl(startingUrl);
-            return await Task.Run(() => CreateGraphFromPage(startingUrl, null));
+
+            cancellationToken.ThrowIfCancellationRequested();
+
+            var firstPage = await LoadPageAsync(startingUrl, null);
+            yield return firstPage;
+
+            await foreach(var lnk in _links.WithCancellation(cancellationToken))
+            {
+                cancellationToken.ThrowIfCancellationRequested();
+                yield return await LoadPageAsync(lnk.link, lnk.parent);
+
+                if (_isDone)
+                    break;
+            }
         }
 
         /// <summary>
@@ -80,28 +100,31 @@ namespace Scraper
         /// </summary>
         /// <param name="startingUrl">The url to start from</param>
         /// <returns>A set of all of the child pages</returns>
-        IEnumerable<CrawlerPageNode> CreateGraphFromPage(string startingUrl, CrawlerPageNode parentPage)
+        async Task<CrawlerPageNode> LoadPageAsync(string startingUrl, CrawlerPageNode parentPage)
         {
-            var pageText = _webClient.DownloadString(startingUrl);
-            var navLinkItems = _navigationLinkParser.ParseHtml(pageText);
+            var pageText = await _webClient.DownloadStringTaskAsync(startingUrl);
+            var navLinks = _navigationLinkParser.ParseHtml(pageText);
+
+            foreach (var lnk in navLinks)
+                _links.Enqueue((lnk, parentPage));
+
+            // Test this after enqueueing any items
+
+            // If the queue is empty AND this page has no nav links
+            // then we're done
+            _isDone = _links.Count == 0;
 
             var thisPage = new CrawlerPageNode
             {
                 PageUrl = startingUrl,
                 HTMLContent = pageText,
-                LinksInPage = navLinkItems,
+                LinksInPage = navLinks,
                 Parent = parentPage
             };
 
-            var childPages = new List<CrawlerPageNode>();
-
-            foreach (var childLink in navLinkItems)
-            {
-                childPages.AddRange(CreateGraphFromPage(childLink, thisPage));
-            }
-            thisPage.Children = childPages;
-            return childPages.Prepend(thisPage);
+            return thisPage;
         }
+
 
         void CheckUrl(string startingUrl)
         {

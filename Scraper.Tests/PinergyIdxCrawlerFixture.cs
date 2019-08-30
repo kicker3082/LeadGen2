@@ -61,7 +61,7 @@ namespace Scraper.Tests
             var nav = (ICrawler)new PinergyIdxCrawler(_wc.Object, _navLinkParser.Object);
             var ex = Assert.Throws<ArgumentException>(() => nav.CrawlWeb("rt%snhsdn"));
             Assert.That(ex.ParamName, Is.EqualTo(@"startingUrl"));
-            Assert.That(ex.Message, Is.EqualTo("startingUrl must be well-formed.\r\nParameter name: startingUrl"));
+            Assert.That(ex.Message, Is.EqualTo("startingUrl must be well-formed. (Parameter 'startingUrl')"));
         }
 
         [Test]
@@ -70,7 +70,7 @@ namespace Scraper.Tests
             var nav = (ICrawler)new PinergyIdxCrawler(_wc.Object, _navLinkParser.Object);
             var ex = Assert.Throws<ArgumentException>(() => nav.CrawlWeb("ftp://mydomain.com"));
             Assert.That(ex.ParamName, Is.EqualTo(@"startingUrl"));
-            Assert.That(ex.Message, Is.EqualTo("startingUrl must be a http or https.\r\nParameter name: startingUrl"));
+            Assert.That(ex.Message, Is.EqualTo("startingUrl must be a http or https. (Parameter 'startingUrl')"));
         }
 
 

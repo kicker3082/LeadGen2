@@ -1,5 +1,5 @@
 ﻿using System.Collections.Generic;
-using System.Threading.Tasks;
+using System.Threading;
 
 namespace Scraper.Core
 {
@@ -14,9 +14,10 @@ namespace Scraper.Core
         /// each page.
         /// </summary>
         /// <param name="startingUrl">A url to begin crawling.</param>
-        /// <returns>A <see cref="Task{TResult}"/> that resolves to batches of <see cref="CrawlerPageNode"/>,
-        /// each containing the discovered links and the <typeparamref name="T">Data Items</typeparamref> in each page.</returns>
-        Task<IEnumerable<CrawlerPageNode>> CrawlWebAsync(string startingUrl);
+        /// <param name="cancellationToken">A token that will </param>
+        /// <returns>An enumeration of <see cref="CrawlerPageNode"/> that asynchronously stream back to the caller,
+        /// each containing the discovered links in each page.</returns>
+        IAsyncEnumerable<CrawlerPageNode> CrawlWebAsync(string startingUrl, CancellationToken cancellationToken);
         /// <summary>
         /// Crawl the graph to discover linked web pages and extract the data items from
         /// each page.
