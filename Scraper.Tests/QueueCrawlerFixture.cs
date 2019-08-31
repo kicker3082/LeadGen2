@@ -7,7 +7,7 @@ using Scraper.Core;
 
 namespace Scraper.Tests
 {
-    public class PinergyIdxCrawlerFixture
+    public class QueueCrawlerFixture
     {
         Mock<INavigationLinkParser> _navLinkParser;
         Mock<IWebClient> _wc;
