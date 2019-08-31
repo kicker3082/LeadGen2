@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Threading.Tasks;
 
-namespace Scraper
+namespace Scraper.Core
 {
     public interface IWebClient
     {

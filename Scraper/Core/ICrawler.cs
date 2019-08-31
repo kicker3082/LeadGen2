@@ -17,7 +17,7 @@ namespace Scraper.Core
         /// <param name="cancellationToken">A token that will </param>
         /// <returns>An enumeration of <see cref="CrawlerPageNode"/> that asynchronously stream back to the caller,
         /// each containing the discovered links in each page.</returns>
-        IAsyncEnumerable<CrawlerPageNode> CrawlWebAsync(string startingUrl, CancellationToken cancellationToken);
+        IAsyncEnumerable<CrawlerPageNode> CrawlWebAsync(string startingUrl, CancellationToken cancellationToken = default);
         /// <summary>
         /// Crawl the graph to discover linked web pages and extract the data items from
         /// each page.

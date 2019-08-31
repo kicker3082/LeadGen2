@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-namespace Scraper
+namespace Scraper.Core
 {
     /// <summary>
     /// Implementations comprehend the passed in html and are able to generate <typeparamref name="T">data items</typeparamref> from it.

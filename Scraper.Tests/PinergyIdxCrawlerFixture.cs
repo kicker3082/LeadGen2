@@ -1,5 +1,6 @@
 using System;
 using System.Linq;
+using System.Threading.Tasks;
 using Moq;
 using NUnit.Framework;
 using Scraper.Core;
@@ -11,38 +12,64 @@ namespace Scraper.Tests
         Mock<INavigationLinkParser> _navLinkParser;
         Mock<IWebClient> _wc;
 
+        static readonly string _noLinksStartingUrl = @"http://mydomain.com/startingpage";
+        static readonly string _noContentUrl = _noLinksStartingUrl  + @"/nocontent";
+        static readonly string _oneLinkStartingUrl = _noLinksStartingUrl + @"/1";
+        static readonly string _twoLinkStartingUrl = _noLinksStartingUrl + @"/2";
+
+        readonly string _noLinksContent = @"This content contains no links";
+        readonly string _oneLinkContent = @"Page Content; Link: 1";
+        readonly string _twoLinksContent = @"Page Content; Link: 1; Link 2";
+        readonly string _link1Url = @"nav link 1";
+        readonly string _link2Url = @"nav link 1";
+
         [SetUp]
         public void Setup()
         {
             _wc = new Mock<IWebClient>();
             _navLinkParser = new Mock<INavigationLinkParser>();
+
+            _wc.Setup(obj => obj.DownloadStringTaskAsync(It.IsAny<string>())).Returns<string>(url => Task.FromResult(
+                url == _noContentUrl ? string.Empty :
+                url == _noLinksStartingUrl ? _noLinksContent :
+                url == _oneLinkStartingUrl ? _oneLinkContent :
+                url == _twoLinkStartingUrl ? _twoLinksContent : 
+                url == _link1Url ? _noLinksContent :
+                url == _link2Url ? _noLinksContent :null
+            ));
+
+            _navLinkParser.Setup(obj => obj.ParseHtml(It.IsAny<string>())).Returns<string>(html =>
+                html == _noLinksContent ? Enumerable.Empty<string>() :
+                html == _oneLinkContent ? new[] { _link1Url } :
+                html == _twoLinksContent ? new[] { _link2Url } : Enumerable.Empty<string>()
+            );
         }
 
         [Test]
         public void Ctor()
         {
-            new PinergyIdxCrawler(_wc.Object, _navLinkParser.Object);
+            new QueueCrawler(_wc.Object, _navLinkParser.Object);
             Assert.Pass();
         }
 
         [Test]
         public void Ctor_NullWebClient_Throws()
         {
-            var ex = Assert.Throws<ArgumentNullException>(() => new PinergyIdxCrawler(null, _navLinkParser.Object));
+            var ex = Assert.Throws<ArgumentNullException>(() => new QueueCrawler(null, _navLinkParser.Object));
             Assert.That(ex.ParamName, Is.EqualTo(@"webClient"));
         }
 
         [Test]
         public void Ctor_NullNavLinkParser_Throws()
         {
-            var ex = Assert.Throws<ArgumentNullException>(() => new PinergyIdxCrawler(_wc.Object, null));
+            var ex = Assert.Throws<ArgumentNullException>(() => new QueueCrawler(_wc.Object, null));
             Assert.That(ex.ParamName, Is.EqualTo(@"navigationLinkParser"));
         }
 
         [Test]
         public void CrawlWeb_StartingUrl_Null_Throws()
         {
-            var nav = (ICrawler)new PinergyIdxCrawler(_wc.Object, _navLinkParser.Object);
+            var nav = (ICrawler)new QueueCrawler(_wc.Object, _navLinkParser.Object);
             var ex = Assert.Throws<ArgumentNullException>(() => nav.CrawlWeb(null));
             Assert.That(ex.ParamName, Is.EqualTo(@"startingUrl"));
         }
@@ -50,7 +77,7 @@ namespace Scraper.Tests
         [Test]
         public void CrawlWeb_StartingUrl_Empty_Throws()
         {
-            var nav = (ICrawler)new PinergyIdxCrawler(_wc.Object, _navLinkParser.Object);
+            var nav = (ICrawler)new QueueCrawler(_wc.Object, _navLinkParser.Object);
             var ex = Assert.Throws<ArgumentOutOfRangeException>(() => nav.CrawlWeb(""));
             Assert.That(ex.ParamName, Is.EqualTo(@"startingUrl"));
         }
@@ -58,7 +85,7 @@ namespace Scraper.Tests
         [Test]
         public void CrawlWeb_StartingUrl_MalformedUrl_Throws()
         {
-            var nav = (ICrawler)new PinergyIdxCrawler(_wc.Object, _navLinkParser.Object);
+            var nav = (ICrawler)new QueueCrawler(_wc.Object, _navLinkParser.Object);
             var ex = Assert.Throws<ArgumentException>(() => nav.CrawlWeb("rt%snhsdn"));
             Assert.That(ex.ParamName, Is.EqualTo(@"startingUrl"));
             Assert.That(ex.Message, Is.EqualTo("startingUrl must be well-formed. (Parameter 'startingUrl')"));
@@ -67,7 +94,7 @@ namespace Scraper.Tests
         [Test]
         public void CrawlWeb_StartingUrl_FtpProtocol_Throws()
         {
-            var nav = (ICrawler)new PinergyIdxCrawler(_wc.Object, _navLinkParser.Object);
+            var nav = (ICrawler)new QueueCrawler(_wc.Object, _navLinkParser.Object);
             var ex = Assert.Throws<ArgumentException>(() => nav.CrawlWeb("ftp://mydomain.com"));
             Assert.That(ex.ParamName, Is.EqualTo(@"startingUrl"));
             Assert.That(ex.Message, Is.EqualTo("startingUrl must be a http or https. (Parameter 'startingUrl')"));
@@ -78,8 +105,8 @@ namespace Scraper.Tests
         public void CrawlWeb_StartingUrl_FirstPageReturnsNoContent_ReturnsOnePage()
         {
             _wc.Setup(obj => obj.DownloadString(It.IsAny<string>())).Returns(@"");
-            var nav = (ICrawler)new PinergyIdxCrawler(_wc.Object, _navLinkParser.Object);
-            var pages = nav.CrawlWeb(@"http://mydomain.com/startingpage");
+            var nav = (ICrawler)new QueueCrawler(_wc.Object, _navLinkParser.Object);
+            var pages = nav.CrawlWeb(_noContentUrl);
             var pagesArray = pages.ToArray();
             Assert.That(pagesArray.Length, Is.EqualTo(1));
         }
@@ -89,10 +116,10 @@ namespace Scraper.Tests
         {
             _wc.Setup(obj => obj.DownloadString(It.IsAny<string>())).Returns(@"");
 
-            var nav = (ICrawler)new PinergyIdxCrawler(_wc.Object, _navLinkParser.Object);
-            var pages = nav.CrawlWeb(@"http://mydomain.com/startingpage");
+            var nav = (ICrawler)new QueueCrawler(_wc.Object, _navLinkParser.Object);
+            var pages = nav.CrawlWeb(_noContentUrl);
             var pagesArray = pages.ToArray();
-            Assert.That(pagesArray[0].PageUrl, Is.EqualTo(@"http://mydomain.com/startingpage"));
+            Assert.That(pagesArray[0].PageUrl, Is.EqualTo(_noContentUrl));
         }
 
         [Test]
@@ -100,8 +127,8 @@ namespace Scraper.Tests
         {
             _wc.Setup(obj => obj.DownloadString(It.IsAny<string>())).Returns(@"");
 
-            var nav = (ICrawler)new PinergyIdxCrawler(_wc.Object, _navLinkParser.Object);
-            var pages = nav.CrawlWeb(@"http://mydomain.com/startingpage");
+            var nav = (ICrawler)new QueueCrawler(_wc.Object, _navLinkParser.Object);
+            var pages = nav.CrawlWeb(_noContentUrl);
             var pagesArray = pages.ToArray();
             Assert.That(pagesArray[0].LinksInPage.Count, Is.EqualTo(0));
         }
@@ -111,8 +138,8 @@ namespace Scraper.Tests
         {
             _wc.Setup(obj => obj.DownloadString(It.IsAny<string>())).Returns(@"");
 
-            var nav = (ICrawler)new PinergyIdxCrawler(_wc.Object, _navLinkParser.Object);
-            var pages = nav.CrawlWeb(@"http://mydomain.com/startingpage");
+            var nav = (ICrawler)new QueueCrawler(_wc.Object, _navLinkParser.Object);
+            var pages = nav.CrawlWeb(_noContentUrl);
             var pagesArray = pages.ToArray();
             Assert.That(pagesArray[0].HttpErrorCode, Is.Null);
         }
@@ -120,10 +147,8 @@ namespace Scraper.Tests
         [Test]
         public void CrawlWeb_StartingUrl_FirstPageReturnsNoContent_ReturnedPageHasBlankContent()
         {
-            _wc.Setup(obj => obj.DownloadString(It.IsAny<string>())).Returns(@"");
-
-            var nav = (ICrawler)new PinergyIdxCrawler(_wc.Object, _navLinkParser.Object);
-            var pages = nav.CrawlWeb(@"http://mydomain.com/startingpage");
+            var nav = (ICrawler)new QueueCrawler(_wc.Object, _navLinkParser.Object);
+            var pages = nav.CrawlWeb(_noContentUrl);
             var pagesArray = pages.ToArray();
             Assert.That(pagesArray[0].HTMLContent, Is.Empty);
         }
@@ -131,20 +156,16 @@ namespace Scraper.Tests
         [Test]
         public void CrawlWeb_StartingUrl_FirstPageReturnsContent_ContentContainsNoLinks_ReturnsOnePage()
         {
-            _wc.Setup(obj => obj.DownloadString(It.IsAny<string>())).Returns(@"This is content without data items or links.");
-
-            var nav = (ICrawler)new PinergyIdxCrawler(_wc.Object, _navLinkParser.Object);
-            var pages = nav.CrawlWeb(@"http://mydomain.com/startingpage");
+            var nav = (ICrawler)new QueueCrawler(_wc.Object, _navLinkParser.Object);
+            var pages = nav.CrawlWeb(_noLinksStartingUrl);
             Assert.That(pages.Count, Is.EqualTo(1));
         }
 
         [Test]
         public void CrawlWeb_StartingUrl_FirstPageReturnsContent_ContentContainsNoLinks_ReturnsZeroLinks()
         {
-            _wc.Setup(obj => obj.DownloadString(It.IsAny<string>())).Returns(@"This is content without data items or links.");
-
-            var nav = (ICrawler)new PinergyIdxCrawler(_wc.Object, _navLinkParser.Object);
-            var pages = nav.CrawlWeb(@"http://mydomain.com/startingpage");
+            var nav = (ICrawler)new QueueCrawler(_wc.Object, _navLinkParser.Object);
+            var pages = nav.CrawlWeb(_noLinksStartingUrl);
             var pagesArray = pages.ToArray();
             Assert.That(pagesArray[0].LinksInPage.Count, Is.EqualTo(0));
         }
@@ -152,17 +173,10 @@ namespace Scraper.Tests
         [Test]
         public void CrawlWeb_StartingUrl_FirstPageReturnsContent_ContentContainsOneLink_LinkedPageContainsNoLinks_ReturnsTwoPages()
         {
-            _navLinkParser.Setup(obj => obj.ParseHtml(It.Is<string>(s => s == @"Page Content; Link: 1"))).Returns(new string[] { @"nav link 1" });
-            _wc.Setup(obj => obj.DownloadString(It.IsAny<string>())).Returns<string>(url =>
-            {
-                if (url == @"http://mydomain.com/startingpage")
-                    return @"Page Content; Link: 1";
-                else
-                    return @"This content contains no links";
-            });
+            _navLinkParser.Setup(obj => obj.ParseHtml(It.Is<string>(s => s == _oneLinkContent))).Returns(new string[] { _link1Url });
 
-            var nav = (ICrawler)new PinergyIdxCrawler(_wc.Object, _navLinkParser.Object);
-            var pages = nav.CrawlWeb(@"http://mydomain.com/startingpage");
+            var nav = (ICrawler)new QueueCrawler(_wc.Object, _navLinkParser.Object);
+            var pages = nav.CrawlWeb(_oneLinkStartingUrl);
             Assert.That(pages.Count, Is.EqualTo(2));
         }
 
@@ -171,18 +185,11 @@ namespace Scraper.Tests
         {
             // A root page is defined as a page with no parent. There should only be one root page in any graph
 
-            _navLinkParser.Setup(obj => obj.ParseHtml(It.Is<string>(s => s == @"Page Content; Link: 1"))).Returns(new string[] { @"nav link 1" });
-            _wc.Setup(obj => obj.DownloadString(It.IsAny<string>())).Returns<string>(url =>
-            {
-                if (url == @"http://mydomain.com/startingpage")
-                    return @"Page Content; Link: 1";
-                else
-                    return @"This content contains no links";
-            });
+            _navLinkParser.Setup(obj => obj.ParseHtml(It.Is<string>(s => s == _oneLinkContent))).Returns(new string[] { _link1Url });
 
-            var nav = (ICrawler)new PinergyIdxCrawler(_wc.Object, _navLinkParser.Object);
-            var pages = nav.CrawlWeb(@"http://mydomain.com/startingpage");
-            var rootPages = pages.Where(p => p.PageUrl == @"http://mydomain.com/startingpage");
+            var nav = (ICrawler)new QueueCrawler(_wc.Object, _navLinkParser.Object);
+            var pages = nav.CrawlWeb(_oneLinkStartingUrl);
+            var rootPages = pages.Where(p => p.PageUrl == _oneLinkStartingUrl);
 
             Assert.That(rootPages.Count, Is.EqualTo(1));
             var rootPage = rootPages.First();
@@ -194,21 +201,14 @@ namespace Scraper.Tests
         {
             // A root page is defined as a page with no parent. There should only be one root page in any graph
 
-            _navLinkParser.Setup(obj => obj.ParseHtml(It.Is<string>(s => s == @"Page Content; Link: 1"))).Returns(new string[] { @"nav link 1" });
-            _wc.Setup(obj => obj.DownloadString(It.IsAny<string>())).Returns<string>(url =>
-            {
-                if (url == @"http://mydomain.com/startingpage")
-                    return @"Page Content; Link: 1";
-                else
-                    return @"This content contains no links";
-            });
+            _navLinkParser.Setup(obj => obj.ParseHtml(It.Is<string>(s => s == _oneLinkContent))).Returns(new string[] { _link1Url });
 
-            var nav = (ICrawler)new PinergyIdxCrawler(_wc.Object, _navLinkParser.Object);
-            var pages = nav.CrawlWeb(@"http://mydomain.com/startingpage");
-            var rootPages = pages.Where(p => p.PageUrl == @"http://mydomain.com/startingpage");
+            var nav = (ICrawler)new QueueCrawler(_wc.Object, _navLinkParser.Object);
+            var pages = nav.CrawlWeb(_oneLinkStartingUrl);
+            var rootPages = pages.Where(p => p.PageUrl == _oneLinkStartingUrl);
             var rootPage = rootPages.First();
 
-            var childPages = rootPage.Children;
+            var childPages = pages.Where(pg => pg.Parent?.PageUrl == _oneLinkStartingUrl);
             Assert.That(childPages.Count, Is.EqualTo(1));
         }
 
@@ -217,21 +217,14 @@ namespace Scraper.Tests
         {
             // A root page is defined as a page with no parent. There should only be one root page in any graph
 
-            _navLinkParser.Setup(obj => obj.ParseHtml(It.Is<string>(s => s == @"Page Content; Link: 1"))).Returns(new string[] { @"nav link 1" });
-            _wc.Setup(obj => obj.DownloadString(It.IsAny<string>())).Returns<string>(url =>
-            {
-                if (url == @"http://mydomain.com/startingpage")
-                    return @"Page Content; Link: 1";
-                else
-                    return @"This content contains no links";
-            });
+            _navLinkParser.Setup(obj => obj.ParseHtml(It.Is<string>(s => s == _oneLinkContent))).Returns(new string[] { _link1Url });
 
-            var nav = (ICrawler)new PinergyIdxCrawler(_wc.Object, _navLinkParser.Object);
-            var pages = nav.CrawlWeb(@"http://mydomain.com/startingpage");
-            var rootPages = pages.Where(p => p.PageUrl == @"http://mydomain.com/startingpage");
+            var nav = (ICrawler)new QueueCrawler(_wc.Object, _navLinkParser.Object);
+            var pages = nav.CrawlWeb(_oneLinkStartingUrl);
+            var rootPages = pages.Where(p => p.PageUrl == _oneLinkStartingUrl);
             var rootPage = rootPages.First();
-            var childPages = rootPage.Children;
-            Assert.That(childPages.All(pg => pg.Parent.PageUrl == @"http://mydomain.com/startingpage"), Is.True);
+            var childPages = pages.Where(pg => pg.Parent?.PageUrl == _oneLinkStartingUrl);
+            Assert.That(childPages.All(pg => pg.Parent?.PageUrl == _oneLinkStartingUrl), Is.True);
         }
 
         [Test]
@@ -241,24 +234,14 @@ namespace Scraper.Tests
 
             _navLinkParser.Setup(obj => obj.ParseHtml(It.IsAny<string>())).Returns<string>(html =>
             {
-                if (html == @"Page Content; Link: 1")
-                    return new string[] { @"nav link 1", @"nav link 2" };
+                if (html == _twoLinksContent)
+                    return new string[] { _link1Url, _link2Url };
                 else
                     return Enumerable.Empty<string>();
             });
 
-            _wc.Setup(obj => obj.DownloadString(It.IsAny<string>())).Returns<string>(url =>
-            {
-                if (url == @"http://mydomain.com/startingpage")
-                    return @"Page Content; Link: 1";
-                else if (url == @"nav link 1")
-                    return @"This content contains no links";
-                else
-                    return @"This content contains no links";
-            });
-
-            var nav = (ICrawler)new PinergyIdxCrawler(_wc.Object, _navLinkParser.Object);
-            var pages = nav.CrawlWeb(@"http://mydomain.com/startingpage");
+            var nav = (ICrawler)new QueueCrawler(_wc.Object, _navLinkParser.Object);
+            var pages = nav.CrawlWeb(_twoLinkStartingUrl);
             Assert.That(pages.Count, Is.EqualTo(3));
         }
 
@@ -269,25 +252,15 @@ namespace Scraper.Tests
 
             _navLinkParser.Setup(obj => obj.ParseHtml(It.IsAny<string>())).Returns<string>(html =>
             {
-                if (html == @"Page Content; Link: 1")
-                    return new string[] { @"nav link 1", @"nav link 2" };
+                if (html == _twoLinksContent)
+                    return new string[] { _link1Url, _link2Url };
                 else
                     return Enumerable.Empty<string>();
             });
 
-            _wc.Setup(obj => obj.DownloadString(It.IsAny<string>())).Returns<string>(url =>
-            {
-                if (url == @"http://mydomain.com/startingpage")
-                    return @"Page Content; Link: 1";
-                else if (url == @"nav link 1")
-                    return @"This content contains no links";
-                else
-                    return @"This content contains no links";
-            });
-
-            var nav = (ICrawler)new PinergyIdxCrawler(_wc.Object, _navLinkParser.Object);
-            var pages = nav.CrawlWeb(@"http://mydomain.com/startingpage");
-            var rootPages = pages.Where(p => p.PageUrl == @"http://mydomain.com/startingpage");
+            var nav = (ICrawler)new QueueCrawler(_wc.Object, _navLinkParser.Object);
+            var pages = nav.CrawlWeb(_twoLinkStartingUrl);
+            var rootPages = pages.Where(p => p.PageUrl == _twoLinkStartingUrl);
 
             Assert.That(rootPages.Count, Is.EqualTo(1));
             var rootPage = rootPages.First();
@@ -301,27 +274,17 @@ namespace Scraper.Tests
 
             _navLinkParser.Setup(obj => obj.ParseHtml(It.IsAny<string>())).Returns<string>(html =>
             {
-                if (html == @"Page Content; Link: 1")
-                    return new string[] { @"nav link 1", @"nav link 2" };
+                if (html == _twoLinksContent)
+                    return new string[] { _link1Url, _link2Url };
                 else
                     return Enumerable.Empty<string>();
             });
 
-            _wc.Setup(obj => obj.DownloadString(It.IsAny<string>())).Returns<string>(url =>
-            {
-                if (url == @"http://mydomain.com/startingpage")
-                    return @"Page Content; Link: 1";
-                else if (url == @"nav link 1")
-                    return @"This content contains no links";
-                else
-                    return @"This content contains no links";
-            });
-
-            var nav = (ICrawler)new PinergyIdxCrawler(_wc.Object, _navLinkParser.Object);
-            var pages = nav.CrawlWeb(@"http://mydomain.com/startingpage");
-            var rootPages = pages.Where(p => p.PageUrl == @"http://mydomain.com/startingpage");
+            var nav = (ICrawler)new QueueCrawler(_wc.Object, _navLinkParser.Object);
+            var pages = nav.CrawlWeb(_twoLinkStartingUrl);
+            var rootPages = pages.Where(p => p.PageUrl == _twoLinkStartingUrl);
             var rootPage = rootPages.First();
-            var childPages = rootPage.Children;
+            var childPages = pages.Where(pg => pg.Parent?.PageUrl == _twoLinkStartingUrl);
             Assert.That(childPages.Count, Is.EqualTo(2));
         }
 
@@ -332,28 +295,18 @@ namespace Scraper.Tests
 
             _navLinkParser.Setup(obj => obj.ParseHtml(It.IsAny<string>())).Returns<string>(html =>
             {
-                if (html == @"Page Content; Link: 1")
-                    return new string[] { @"nav link 1", @"nav link 2" };
+                if (html == _twoLinksContent)
+                    return new string[] { _link1Url, _link2Url };
                 else
                     return Enumerable.Empty<string>();
             });
 
-            _wc.Setup(obj => obj.DownloadString(It.IsAny<string>())).Returns<string>(url =>
-            {
-                if (url == @"http://mydomain.com/startingpage")
-                    return @"Page Content; Link: 1";
-                else if (url == @"nav link 1")
-                    return @"This content contains no links";
-                else
-                    return @"This content contains no links";
-            });
-
-            var nav = (ICrawler)new PinergyIdxCrawler(_wc.Object, _navLinkParser.Object);
-            var pages = nav.CrawlWeb(@"http://mydomain.com/startingpage");
-            var rootPages = pages.Where(p => p.PageUrl == @"http://mydomain.com/startingpage");
+            var nav = (ICrawler)new QueueCrawler(_wc.Object, _navLinkParser.Object);
+            var pages = nav.CrawlWeb(_twoLinkStartingUrl);
+            var rootPages = pages.Where(p => p.PageUrl == _twoLinkStartingUrl);
             var rootPage = rootPages.First();
-            var childPages = rootPage.Children;
-            Assert.That(childPages.All(pg => pg.Parent.PageUrl == @"http://mydomain.com/startingpage"), Is.True);
+            var childPages = pages.Where(pg => pg.Parent?.PageUrl == _twoLinkStartingUrl);
+            Assert.That(childPages.All(pg => pg.Parent?.PageUrl == _twoLinkStartingUrl), Is.True);
         }
 
         [Test]
@@ -363,29 +316,19 @@ namespace Scraper.Tests
 
             _navLinkParser.Setup(obj => obj.ParseHtml(It.IsAny<string>())).Returns<string>(html =>
             {
-                if (html == @"Page Content; Link: 1")
-                    return new string[] { @"nav link 1", @"nav link 2" };
+                if (html == _twoLinksContent)
+                    return new string[] { _link1Url, _link2Url };
                 else
                     return Enumerable.Empty<string>();
             });
 
-            _wc.Setup(obj => obj.DownloadString(It.IsAny<string>())).Returns<string>(url =>
-            {
-                if (url == @"http://mydomain.com/startingpage")
-                    return @"Page Content; Link: 1";
-                else if (url == @"nav link 1")
-                    return @"This content contains no links";
-                else
-                    return @"This content contains no links";
-            });
-
-            var nav = (ICrawler)new PinergyIdxCrawler(_wc.Object, _navLinkParser.Object);
-            var pages = nav.CrawlWeb(@"http://mydomain.com/startingpage");
-            var rootPages = pages.Where(p => p.PageUrl == @"http://mydomain.com/startingpage");
+            var nav = (ICrawler)new QueueCrawler(_wc.Object, _navLinkParser.Object);
+            var pages = nav.CrawlWeb(_twoLinkStartingUrl);
+            var rootPages = pages.Where(p => p.PageUrl == _twoLinkStartingUrl);
             var rootPage = rootPages.First();
-            var childPages = rootPage.Children.ToArray();
-            Assert.That(childPages[0].PageUrl, Is.EqualTo(@"nav link 1"));
-            Assert.That(childPages[1].PageUrl, Is.EqualTo(@"nav link 2"));
+            var childPages = pages.Where(pg => pg.Parent?.PageUrl == _twoLinkStartingUrl).ToArray();
+            Assert.That(childPages[0].PageUrl, Is.EqualTo(_link1Url));
+            Assert.That(childPages[1].PageUrl, Is.EqualTo(_link2Url));
         }
 
         [Test]
@@ -395,28 +338,18 @@ namespace Scraper.Tests
 
             _navLinkParser.Setup(obj => obj.ParseHtml(It.IsAny<string>())).Returns<string>(html =>
             {
-                if (html == @"Page Content; Link: 1")
-                    return new string[] { @"nav link 1", @"nav link 2" };
+                if (html == _twoLinksContent)
+                    return new string[] { _link1Url, _link2Url };
                 else
                     return Enumerable.Empty<string>();
             });
 
-            _wc.Setup(obj => obj.DownloadString(It.IsAny<string>())).Returns<string>(url =>
-            {
-                if (url == @"http://mydomain.com/startingpage")
-                    return @"Page Content; Link: 1";
-                else if (url == @"nav link 1")
-                    return @"This content contains no links";
-                else
-                    return @"This content contains no links";
-            });
-
-            var nav = (ICrawler)new PinergyIdxCrawler(_wc.Object, _navLinkParser.Object);
-            var pages = nav.CrawlWeb(@"http://mydomain.com/startingpage");
-            var rootPages = pages.Where(p => p.PageUrl == @"http://mydomain.com/startingpage");
+            var nav = (ICrawler)new QueueCrawler(_wc.Object, _navLinkParser.Object);
+            var pages = nav.CrawlWeb(_twoLinkStartingUrl);
+            var rootPages = pages.Where(p => p.PageUrl == _twoLinkStartingUrl);
             var rootPage = rootPages.First();
-            var childPages = rootPage.Children;
-            Assert.That(childPages.All(pg => pg.Children.Count() == 0), Is.True);
+            var childPageUrls = pages.Where(pg => pg.Parent?.PageUrl == _twoLinkStartingUrl).Select(pg => pg.PageUrl);
+            Assert.That(pages.Any(pg => childPageUrls.Contains(pg.Parent?.PageUrl)), Is.False);
         }
 
         // Continue tests for multiple levels of children
@@ -425,7 +358,7 @@ namespace Scraper.Tests
         //public void CrawlWeb_StartingUrl_FirstPageReturns500_SetsHttpErrorCode()
         //{
         //    var nav = (ICrawler)new PinergyIdxCrawler();
-        //    var pages = nav.CrawlWeb(@"http://mydomain.com/startingpage");
+        //    var pages = nav.CrawlWeb(_startingUrl);
         //    var firstPage = pages.First();
         //    Assert.That(firstPage.HttpErrorCode, Is.EqualTo(500));
         //}

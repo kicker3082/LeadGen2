@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-namespace Scraper
+namespace Scraper.Core
 {
     /// <summary>
     /// Inplementations comprehend the passed in html and generate a set of urls for further navigation
