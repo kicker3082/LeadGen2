@@ -41,7 +41,7 @@ namespace Scraper.Tests
             _navLinkParser.Setup(obj => obj.ParseHtml(It.IsAny<string>())).Returns<string>(html =>
                 html == _noLinksContent ? Enumerable.Empty<string>() :
                 html == _oneLinkContent ? new[] { _link1Url } :
-                html == _twoLinksContent ? new[] { _link2Url } : Enumerable.Empty<string>()
+                html == _twoLinksContent ? new[] { _link1Url, _link2Url } : Enumerable.Empty<string>()
             );
         }
 
@@ -173,8 +173,6 @@ namespace Scraper.Tests
         [Test]
         public void CrawlWeb_StartingUrl_FirstPageReturnsContent_ContentContainsOneLink_LinkedPageContainsNoLinks_ReturnsTwoPages()
         {
-            _navLinkParser.Setup(obj => obj.ParseHtml(It.Is<string>(s => s == _oneLinkContent))).Returns(new string[] { _link1Url });
-
             var nav = (ICrawler)new QueueCrawler(_wc.Object, _navLinkParser.Object);
             var pages = nav.CrawlWeb(_oneLinkStartingUrl);
             Assert.That(pages.Count, Is.EqualTo(2));
@@ -184,9 +182,6 @@ namespace Scraper.Tests
         public void CrawlWeb_StartingUrl_FirstPageReturnsContent_ContentContainsOneLink_LinkedPageContainsNoLinks_HasOneRootPageWithNullParent()
         {
             // A root page is defined as a page with no parent. There should only be one root page in any graph
-
-            _navLinkParser.Setup(obj => obj.ParseHtml(It.Is<string>(s => s == _oneLinkContent))).Returns(new string[] { _link1Url });
-
             var nav = (ICrawler)new QueueCrawler(_wc.Object, _navLinkParser.Object);
             var pages = nav.CrawlWeb(_oneLinkStartingUrl);
             var rootPages = pages.Where(p => p.PageUrl == _oneLinkStartingUrl);
@@ -200,9 +195,6 @@ namespace Scraper.Tests
         public void CrawlWeb_StartingUrl_FirstPageReturnsContent_ContentContainsOneLink_LinkedPageContainsNoLinks_RootPageHasOneChild()
         {
             // A root page is defined as a page with no parent. There should only be one root page in any graph
-
-            _navLinkParser.Setup(obj => obj.ParseHtml(It.Is<string>(s => s == _oneLinkContent))).Returns(new string[] { _link1Url });
-
             var nav = (ICrawler)new QueueCrawler(_wc.Object, _navLinkParser.Object);
             var pages = nav.CrawlWeb(_oneLinkStartingUrl);
             var rootPages = pages.Where(p => p.PageUrl == _oneLinkStartingUrl);
@@ -216,9 +208,6 @@ namespace Scraper.Tests
         public void CrawlWeb_StartingUrl_FirstPageReturnsContent_ContentContainsOneLink_LinkedPageContainsNoLinks_ChildHasRootPageAsParent()
         {
             // A root page is defined as a page with no parent. There should only be one root page in any graph
-
-            _navLinkParser.Setup(obj => obj.ParseHtml(It.Is<string>(s => s == _oneLinkContent))).Returns(new string[] { _link1Url });
-
             var nav = (ICrawler)new QueueCrawler(_wc.Object, _navLinkParser.Object);
             var pages = nav.CrawlWeb(_oneLinkStartingUrl);
             var rootPages = pages.Where(p => p.PageUrl == _oneLinkStartingUrl);
@@ -230,16 +219,6 @@ namespace Scraper.Tests
         [Test]
         public void CrawlWeb_StartingUrl_FirstPageReturnsContent_ContentContainsTwoLinks_ReturnsThreePages()
         {
-            // A root page is defined as a page with no parent. There should only be one root page in any graph
-
-            _navLinkParser.Setup(obj => obj.ParseHtml(It.IsAny<string>())).Returns<string>(html =>
-            {
-                if (html == _twoLinksContent)
-                    return new string[] { _link1Url, _link2Url };
-                else
-                    return Enumerable.Empty<string>();
-            });
-
             var nav = (ICrawler)new QueueCrawler(_wc.Object, _navLinkParser.Object);
             var pages = nav.CrawlWeb(_twoLinkStartingUrl);
             Assert.That(pages.Count, Is.EqualTo(3));
@@ -249,15 +228,6 @@ namespace Scraper.Tests
         public void CrawlWeb_StartingUrl_FirstPageReturnsContent_ContentContainsTwoLinks_HasOneRootPageWithNullParent()
         {
             // A root page is defined as a page with no parent. There should only be one root page in any graph
-
-            _navLinkParser.Setup(obj => obj.ParseHtml(It.IsAny<string>())).Returns<string>(html =>
-            {
-                if (html == _twoLinksContent)
-                    return new string[] { _link1Url, _link2Url };
-                else
-                    return Enumerable.Empty<string>();
-            });
-
             var nav = (ICrawler)new QueueCrawler(_wc.Object, _navLinkParser.Object);
             var pages = nav.CrawlWeb(_twoLinkStartingUrl);
             var rootPages = pages.Where(p => p.PageUrl == _twoLinkStartingUrl);
@@ -271,15 +241,6 @@ namespace Scraper.Tests
         public void CrawlWeb_StartingUrl_FirstPageReturnsContent_ContentContainsTwoLinks_RootPageHasTwoChildPages()
         {
             // A root page is defined as a page with no parent. There should only be one root page in any graph
-
-            _navLinkParser.Setup(obj => obj.ParseHtml(It.IsAny<string>())).Returns<string>(html =>
-            {
-                if (html == _twoLinksContent)
-                    return new string[] { _link1Url, _link2Url };
-                else
-                    return Enumerable.Empty<string>();
-            });
-
             var nav = (ICrawler)new QueueCrawler(_wc.Object, _navLinkParser.Object);
             var pages = nav.CrawlWeb(_twoLinkStartingUrl);
             var rootPages = pages.Where(p => p.PageUrl == _twoLinkStartingUrl);
@@ -292,15 +253,6 @@ namespace Scraper.Tests
         public void CrawlWeb_StartingUrl_FirstPageReturnsContent_ContentContainsTwoLinks_ChildPagesHaveRootPageAsParent()
         {
             // A root page is defined as a page with no parent. There should only be one root page in any graph
-
-            _navLinkParser.Setup(obj => obj.ParseHtml(It.IsAny<string>())).Returns<string>(html =>
-            {
-                if (html == _twoLinksContent)
-                    return new string[] { _link1Url, _link2Url };
-                else
-                    return Enumerable.Empty<string>();
-            });
-
             var nav = (ICrawler)new QueueCrawler(_wc.Object, _navLinkParser.Object);
             var pages = nav.CrawlWeb(_twoLinkStartingUrl);
             var rootPages = pages.Where(p => p.PageUrl == _twoLinkStartingUrl);
@@ -313,15 +265,6 @@ namespace Scraper.Tests
         public void CrawlWeb_StartingUrl_FirstPageReturnsContent_ContentContainsTwoLinks_ChildPagesHaveCorrectUrl()
         {
             // A root page is defined as a page with no parent. There should only be one root page in any graph
-
-            _navLinkParser.Setup(obj => obj.ParseHtml(It.IsAny<string>())).Returns<string>(html =>
-            {
-                if (html == _twoLinksContent)
-                    return new string[] { _link1Url, _link2Url };
-                else
-                    return Enumerable.Empty<string>();
-            });
-
             var nav = (ICrawler)new QueueCrawler(_wc.Object, _navLinkParser.Object);
             var pages = nav.CrawlWeb(_twoLinkStartingUrl);
             var rootPages = pages.Where(p => p.PageUrl == _twoLinkStartingUrl);
@@ -335,15 +278,6 @@ namespace Scraper.Tests
         public void CrawlWeb_StartingUrl_FirstPageReturnsContent_ContentContainsTwoLinks_ChildPagesHaveNoChildren()
         {
             // A root page is defined as a page with no parent. There should only be one root page in any graph
-
-            _navLinkParser.Setup(obj => obj.ParseHtml(It.IsAny<string>())).Returns<string>(html =>
-            {
-                if (html == _twoLinksContent)
-                    return new string[] { _link1Url, _link2Url };
-                else
-                    return Enumerable.Empty<string>();
-            });
-
             var nav = (ICrawler)new QueueCrawler(_wc.Object, _navLinkParser.Object);
             var pages = nav.CrawlWeb(_twoLinkStartingUrl);
             var rootPages = pages.Where(p => p.PageUrl == _twoLinkStartingUrl);
