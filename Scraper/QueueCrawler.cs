@@ -119,6 +119,8 @@ namespace Scraper
 
             if (!_isDone)
             {
+                // NOTE: Iterating over the _links queue will automatically dequeue each item
+                // because AsyncQueue is a wrapper for a BufferBlock.
                 await foreach (var (link, parent) in _links.WithCancellation(cancellationToken))
                 {
                     yield return await LoadPageAsync(link, parent);
@@ -137,6 +139,8 @@ namespace Scraper
         async Task<CrawlerPageNode> LoadPageAsync(string startingUrl, CrawlerPageNode parentPage)
         {
             var pageText = await _webClient.DownloadStringTaskAsync(startingUrl);
+            // Make sure to add the startingUrl to the set of visited pages so we don't wrap around to the top
+            // page.
 
             var thisPage = new CrawlerPageNode
             {
