@@ -21,6 +21,7 @@ namespace Scraper
     {
         private readonly IWebClient _webClient;
         private readonly INavigationLinkParser _navigationLinkParser;
+        private readonly PageLoader _pageLoader;
         readonly AsyncQueue<(string link, CrawlerPageNode parent)> _links;
 
         // This is the flag indicating that we should stop waiting for more links to appear in the queue.
@@ -36,14 +37,10 @@ namespace Scraper
         // no links discovered, then we're done.
         bool _isDone;
 
-        public QueueCrawler(
-            IWebClient webClient,
-            INavigationLinkParser navigationLinkParser)
+        public QueueCrawler(PageLoader pageLoader)
         {
-            _webClient = webClient ?? throw new ArgumentNullException(nameof(webClient));
-            _navigationLinkParser = navigationLinkParser ?? throw new ArgumentNullException(nameof(navigationLinkParser));
-
             _links = new AsyncQueue<(string, CrawlerPageNode)>();
+            _pageLoader = pageLoader;
         }
 
         /// <summary>
@@ -114,56 +111,34 @@ namespace Scraper
         {
             CheckUrl(startingUrl);
 
-            var firstPage = await LoadPageAsync(startingUrl, null);
+            var firstPage = await _pageLoader.LoadPageAsync(startingUrl, null);
+            foreach (var lnk in firstPage.LinksInPage)
+                _links.Enqueue((lnk, firstPage));
             yield return firstPage;
 
-            if (!_isDone)
+            if (_links.Count != 0)
             {
                 // NOTE: Iterating over the _links queue will automatically dequeue each item
                 // because AsyncQueue is a wrapper for a BufferBlock.
                 await foreach (var (link, parent) in _links.WithCancellation(cancellationToken))
                 {
-                    yield return await LoadPageAsync(link, parent);
+                    var page = await _pageLoader.LoadPageAsync(link, parent);
 
-                    if (_isDone)
+                    foreach (var lnk in page.LinksInPage)
+                        _links.Enqueue((lnk, page));
+
+                    yield return page;
+                    // Test this after enqueueing any items
+
+                    // If the queue is empty AND this page has no nav links
+                    // then we're done
+
+                    if (_links.Count == 0)
                         break;
                 }
             }
         }
 
-        /// <summary>
-        /// Recursively capture the page content and links
-        /// </summary>
-        /// <param name="startingUrl">The url to start from</param>
-        /// <returns>A set of all of the child pages</returns>
-        async Task<CrawlerPageNode> LoadPageAsync(string startingUrl, CrawlerPageNode parentPage)
-        {
-            var pageText = await _webClient.DownloadStringTaskAsync(startingUrl);
-            // Make sure to add the startingUrl to the set of visited pages so we don't wrap around to the top
-            // page.
-
-            var thisPage = new CrawlerPageNode
-            {
-                PageUrl = startingUrl,
-                HTMLContent = pageText,
-                Parent = parentPage
-            };
-
-            var navLinks = _navigationLinkParser.ParseHtml(pageText);
-
-            thisPage.LinksInPage = navLinks;
-
-            foreach (var lnk in navLinks)
-                _links.Enqueue((lnk, thisPage));
-
-            // Test this after enqueueing any items
-
-            // If the queue is empty AND this page has no nav links
-            // then we're done
-            _isDone = _links.Count == 0;
-
-            return thisPage;
-        }
 
         /// <summary>
         /// Determine if the starting Url meets the criteria for crawling

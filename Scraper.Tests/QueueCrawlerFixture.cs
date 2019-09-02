@@ -7,10 +7,32 @@ using Scraper.Core;
 
 namespace Scraper.Tests
 {
+    public class PageLoaderFixture
+    {
+
+        //[Test]
+        //public void Ctor_NullWebClient_Throws()
+        //{
+        //    var ex = Assert.Throws<ArgumentNullException>(() => new QueueCrawler(null, _navLinkParser.Object));
+        //    Assert.That(ex.ParamName, Is.EqualTo(@"webClient"));
+        //}
+
+        //[Test]
+        //public void Ctor_NullNavLinkParser_Throws()
+        //{
+        //    var ex = Assert.Throws<ArgumentNullException>(() => new QueueCrawler(_wc.Object, null));
+        //    Assert.That(ex.ParamName, Is.EqualTo(@"navigationLinkParser"));
+        //}
+
+
+
+
+    }
     public class QueueCrawlerFixture
     {
         Mock<INavigationLinkParser> _navLinkParser;
         Mock<IWebClient> _wc;
+        PageLoader _loader;
 
         static readonly string _noLinksStartingUrl = @"http://mydomain.com/startingpage";
         static readonly string _noContentUrl = _noLinksStartingUrl  + @"/nocontent";
@@ -28,6 +50,7 @@ namespace Scraper.Tests
         {
             _wc = new Mock<IWebClient>();
             _navLinkParser = new Mock<INavigationLinkParser>();
+           
 
             _wc.Setup(obj => obj.DownloadStringTaskAsync(It.IsAny<string>())).Returns<string>(url => Task.FromResult(
                 url == _noContentUrl ? string.Empty :
@@ -43,33 +66,22 @@ namespace Scraper.Tests
                 html == _oneLinkContent ? new[] { _link1Url } :
                 html == _twoLinksContent ? new[] { _link1Url, _link2Url } : Enumerable.Empty<string>()
             );
+            _loader = new PageLoader(_wc.Object, _navLinkParser.Object);
         }
 
         [Test]
         public void Ctor()
         {
-            new QueueCrawler(_wc.Object, _navLinkParser.Object);
+            
+            new QueueCrawler(_loader);
             Assert.Pass();
         }
 
-        [Test]
-        public void Ctor_NullWebClient_Throws()
-        {
-            var ex = Assert.Throws<ArgumentNullException>(() => new QueueCrawler(null, _navLinkParser.Object));
-            Assert.That(ex.ParamName, Is.EqualTo(@"webClient"));
-        }
-
-        [Test]
-        public void Ctor_NullNavLinkParser_Throws()
-        {
-            var ex = Assert.Throws<ArgumentNullException>(() => new QueueCrawler(_wc.Object, null));
-            Assert.That(ex.ParamName, Is.EqualTo(@"navigationLinkParser"));
-        }
-
+        
         [Test]
         public void CrawlWeb_StartingUrl_Null_Throws()
         {
-            var nav = (ICrawler)new QueueCrawler(_wc.Object, _navLinkParser.Object);
+            var nav = (ICrawler)new QueueCrawler(_loader);
             var ex = Assert.Throws<ArgumentNullException>(() => nav.CrawlWeb(null));
             Assert.That(ex.ParamName, Is.EqualTo(@"startingUrl"));
         }
@@ -77,7 +89,7 @@ namespace Scraper.Tests
         [Test]
         public void CrawlWeb_StartingUrl_Empty_Throws()
         {
-            var nav = (ICrawler)new QueueCrawler(_wc.Object, _navLinkParser.Object);
+            var nav = (ICrawler)new QueueCrawler(_loader);
             var ex = Assert.Throws<ArgumentOutOfRangeException>(() => nav.CrawlWeb(""));
             Assert.That(ex.ParamName, Is.EqualTo(@"startingUrl"));
         }
@@ -85,7 +97,7 @@ namespace Scraper.Tests
         [Test]
         public void CrawlWeb_StartingUrl_MalformedUrl_Throws()
         {
-            var nav = (ICrawler)new QueueCrawler(_wc.Object, _navLinkParser.Object);
+            var nav = (ICrawler)new QueueCrawler(_loader);
             var ex = Assert.Throws<ArgumentException>(() => nav.CrawlWeb("rt%snhsdn"));
             Assert.That(ex.ParamName, Is.EqualTo(@"startingUrl"));
             Assert.That(ex.Message, Is.EqualTo("startingUrl must be well-formed. (Parameter 'startingUrl')"));
@@ -94,7 +106,7 @@ namespace Scraper.Tests
         [Test]
         public void CrawlWeb_StartingUrl_FtpProtocol_Throws()
         {
-            var nav = (ICrawler)new QueueCrawler(_wc.Object, _navLinkParser.Object);
+            var nav = (ICrawler)new QueueCrawler(_loader);
             var ex = Assert.Throws<ArgumentException>(() => nav.CrawlWeb("ftp://mydomain.com"));
             Assert.That(ex.ParamName, Is.EqualTo(@"startingUrl"));
             Assert.That(ex.Message, Is.EqualTo("startingUrl must be a http or https. (Parameter 'startingUrl')"));
@@ -105,7 +117,7 @@ namespace Scraper.Tests
         public void CrawlWeb_StartingUrl_FirstPageReturnsNoContent_ReturnsOnePage()
         {
             _wc.Setup(obj => obj.DownloadString(It.IsAny<string>())).Returns(@"");
-            var nav = (ICrawler)new QueueCrawler(_wc.Object, _navLinkParser.Object);
+            var nav = (ICrawler)new QueueCrawler(_loader);
             var pages = nav.CrawlWeb(_noContentUrl);
             var pagesArray = pages.ToArray();
             Assert.That(pagesArray.Length, Is.EqualTo(1));
@@ -116,7 +128,7 @@ namespace Scraper.Tests
         {
             _wc.Setup(obj => obj.DownloadString(It.IsAny<string>())).Returns(@"");
 
-            var nav = (ICrawler)new QueueCrawler(_wc.Object, _navLinkParser.Object);
+            var nav = (ICrawler)new QueueCrawler(_loader);
             var pages = nav.CrawlWeb(_noContentUrl);
             var pagesArray = pages.ToArray();
             Assert.That(pagesArray[0].PageUrl, Is.EqualTo(_noContentUrl));
@@ -127,7 +139,7 @@ namespace Scraper.Tests
         {
             _wc.Setup(obj => obj.DownloadString(It.IsAny<string>())).Returns(@"");
 
-            var nav = (ICrawler)new QueueCrawler(_wc.Object, _navLinkParser.Object);
+            var nav = (ICrawler)new QueueCrawler(_loader);
             var pages = nav.CrawlWeb(_noContentUrl);
             var pagesArray = pages.ToArray();
             Assert.That(pagesArray[0].LinksInPage.Count, Is.EqualTo(0));
@@ -138,7 +150,7 @@ namespace Scraper.Tests
         {
             _wc.Setup(obj => obj.DownloadString(It.IsAny<string>())).Returns(@"");
 
-            var nav = (ICrawler)new QueueCrawler(_wc.Object, _navLinkParser.Object);
+            var nav = (ICrawler)new QueueCrawler(_loader);
             var pages = nav.CrawlWeb(_noContentUrl);
             var pagesArray = pages.ToArray();
             Assert.That(pagesArray[0].HttpErrorCode, Is.Null);
@@ -147,7 +159,7 @@ namespace Scraper.Tests
         [Test]
         public void CrawlWeb_StartingUrl_FirstPageReturnsNoContent_ReturnedPageHasBlankContent()
         {
-            var nav = (ICrawler)new QueueCrawler(_wc.Object, _navLinkParser.Object);
+            var nav = (ICrawler)new QueueCrawler(_loader);
             var pages = nav.CrawlWeb(_noContentUrl);
             var pagesArray = pages.ToArray();
             Assert.That(pagesArray[0].HTMLContent, Is.Empty);
@@ -156,7 +168,7 @@ namespace Scraper.Tests
         [Test]
         public void CrawlWeb_StartingUrl_FirstPageReturnsContent_ContentContainsNoLinks_ReturnsOnePage()
         {
-            var nav = (ICrawler)new QueueCrawler(_wc.Object, _navLinkParser.Object);
+            var nav = (ICrawler)new QueueCrawler(_loader);
             var pages = nav.CrawlWeb(_noLinksStartingUrl);
             Assert.That(pages.Count, Is.EqualTo(1));
         }
@@ -164,7 +176,7 @@ namespace Scraper.Tests
         [Test]
         public void CrawlWeb_StartingUrl_FirstPageReturnsContent_ContentContainsNoLinks_ReturnsZeroLinks()
         {
-            var nav = (ICrawler)new QueueCrawler(_wc.Object, _navLinkParser.Object);
+            var nav = (ICrawler)new QueueCrawler(_loader);
             var pages = nav.CrawlWeb(_noLinksStartingUrl);
             var pagesArray = pages.ToArray();
             Assert.That(pagesArray[0].LinksInPage.Count, Is.EqualTo(0));
@@ -173,7 +185,7 @@ namespace Scraper.Tests
         [Test]
         public void CrawlWeb_StartingUrl_FirstPageReturnsContent_ContentContainsOneLink_LinkedPageContainsNoLinks_ReturnsTwoPages()
         {
-            var nav = (ICrawler)new QueueCrawler(_wc.Object, _navLinkParser.Object);
+            var nav = (ICrawler)new QueueCrawler(_loader);
             var pages = nav.CrawlWeb(_oneLinkStartingUrl);
             Assert.That(pages.Count, Is.EqualTo(2));
         }
@@ -182,7 +194,7 @@ namespace Scraper.Tests
         public void CrawlWeb_StartingUrl_FirstPageReturnsContent_ContentContainsOneLink_LinkedPageContainsNoLinks_HasOneRootPageWithNullParent()
         {
             // A root page is defined as a page with no parent. There should only be one root page in any graph
-            var nav = (ICrawler)new QueueCrawler(_wc.Object, _navLinkParser.Object);
+            var nav = (ICrawler)new QueueCrawler(_loader);
             var pages = nav.CrawlWeb(_oneLinkStartingUrl);
             var rootPages = pages.Where(p => p.PageUrl == _oneLinkStartingUrl);
 
@@ -195,20 +207,20 @@ namespace Scraper.Tests
         public void CrawlWeb_StartingUrl_FirstPageReturnsContent_ContentContainsOneLink_LinkedPageContainsNoLinks_RootPageHasOneChild()
         {
             // A root page is defined as a page with no parent. There should only be one root page in any graph
-            var nav = (ICrawler)new QueueCrawler(_wc.Object, _navLinkParser.Object);
+            var nav = (ICrawler)new QueueCrawler(_loader);
             var pages = nav.CrawlWeb(_oneLinkStartingUrl);
             var rootPages = pages.Where(p => p.PageUrl == _oneLinkStartingUrl);
             var rootPage = rootPages.First();
 
             var childPages = pages.Where(pg => pg.Parent?.PageUrl == _oneLinkStartingUrl);
             Assert.That(childPages.Count, Is.EqualTo(1));
-        }
+        }     
 
         [Test]
         public void CrawlWeb_StartingUrl_FirstPageReturnsContent_ContentContainsOneLink_LinkedPageContainsNoLinks_ChildHasRootPageAsParent()
         {
             // A root page is defined as a page with no parent. There should only be one root page in any graph
-            var nav = (ICrawler)new QueueCrawler(_wc.Object, _navLinkParser.Object);
+            var nav = (ICrawler)new QueueCrawler(_loader);
             var pages = nav.CrawlWeb(_oneLinkStartingUrl);
             var rootPages = pages.Where(p => p.PageUrl == _oneLinkStartingUrl);
             var rootPage = rootPages.First();
@@ -219,7 +231,7 @@ namespace Scraper.Tests
         [Test]
         public void CrawlWeb_StartingUrl_FirstPageReturnsContent_ContentContainsTwoLinks_ReturnsThreePages()
         {
-            var nav = (ICrawler)new QueueCrawler(_wc.Object, _navLinkParser.Object);
+            var nav = (ICrawler)new QueueCrawler(_loader);
             var pages = nav.CrawlWeb(_twoLinkStartingUrl);
             Assert.That(pages.Count, Is.EqualTo(3));
         }
@@ -228,7 +240,7 @@ namespace Scraper.Tests
         public void CrawlWeb_StartingUrl_FirstPageReturnsContent_ContentContainsTwoLinks_HasOneRootPageWithNullParent()
         {
             // A root page is defined as a page with no parent. There should only be one root page in any graph
-            var nav = (ICrawler)new QueueCrawler(_wc.Object, _navLinkParser.Object);
+            var nav = (ICrawler)new QueueCrawler(_loader);
             var pages = nav.CrawlWeb(_twoLinkStartingUrl);
             var rootPages = pages.Where(p => p.PageUrl == _twoLinkStartingUrl);
 
@@ -241,7 +253,7 @@ namespace Scraper.Tests
         public void CrawlWeb_StartingUrl_FirstPageReturnsContent_ContentContainsTwoLinks_RootPageHasTwoChildPages()
         {
             // A root page is defined as a page with no parent. There should only be one root page in any graph
-            var nav = (ICrawler)new QueueCrawler(_wc.Object, _navLinkParser.Object);
+            var nav = (ICrawler)new QueueCrawler(_loader);
             var pages = nav.CrawlWeb(_twoLinkStartingUrl);
             var rootPages = pages.Where(p => p.PageUrl == _twoLinkStartingUrl);
             var rootPage = rootPages.First();
@@ -253,7 +265,7 @@ namespace Scraper.Tests
         public void CrawlWeb_StartingUrl_FirstPageReturnsContent_ContentContainsTwoLinks_ChildPagesHaveRootPageAsParent()
         {
             // A root page is defined as a page with no parent. There should only be one root page in any graph
-            var nav = (ICrawler)new QueueCrawler(_wc.Object, _navLinkParser.Object);
+            var nav = (ICrawler)new QueueCrawler(_loader);
             var pages = nav.CrawlWeb(_twoLinkStartingUrl);
             var rootPages = pages.Where(p => p.PageUrl == _twoLinkStartingUrl);
             var rootPage = rootPages.First();
@@ -265,7 +277,7 @@ namespace Scraper.Tests
         public void CrawlWeb_StartingUrl_FirstPageReturnsContent_ContentContainsTwoLinks_ChildPagesHaveCorrectUrl()
         {
             // A root page is defined as a page with no parent. There should only be one root page in any graph
-            var nav = (ICrawler)new QueueCrawler(_wc.Object, _navLinkParser.Object);
+            var nav = (ICrawler)new QueueCrawler(_loader);
             var pages = nav.CrawlWeb(_twoLinkStartingUrl);
             var rootPages = pages.Where(p => p.PageUrl == _twoLinkStartingUrl);
             var rootPage = rootPages.First();
@@ -278,7 +290,7 @@ namespace Scraper.Tests
         public void CrawlWeb_StartingUrl_FirstPageReturnsContent_ContentContainsTwoLinks_ChildPagesHaveNoChildren()
         {
             // A root page is defined as a page with no parent. There should only be one root page in any graph
-            var nav = (ICrawler)new QueueCrawler(_wc.Object, _navLinkParser.Object);
+            var nav = (ICrawler)new QueueCrawler(_loader);
             var pages = nav.CrawlWeb(_twoLinkStartingUrl);
             var rootPages = pages.Where(p => p.PageUrl == _twoLinkStartingUrl);
             var rootPage = rootPages.First();
