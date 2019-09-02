@@ -19,9 +19,7 @@ namespace Scraper
     /// </remarks>
     public class QueueCrawler : ICrawler
     {
-        private readonly IWebClient _webClient;
-        private readonly INavigationLinkParser _navigationLinkParser;
-        private readonly PageLoader _pageLoader;
+        private readonly IPageLoader _pageLoader;
         readonly AsyncQueue<(string link, CrawlerPageNode parent)> _links;
 
         // This is the flag indicating that we should stop waiting for more links to appear in the queue.
@@ -37,7 +35,7 @@ namespace Scraper
         // no links discovered, then we're done.
         bool _isDone;
 
-        public QueueCrawler(PageLoader pageLoader)
+        public QueueCrawler(IPageLoader pageLoader)
         {
             _links = new AsyncQueue<(string, CrawlerPageNode)>();
             _pageLoader = pageLoader;
@@ -112,6 +110,11 @@ namespace Scraper
             CheckUrl(startingUrl);
 
             var firstPage = await _pageLoader.LoadPageAsync(startingUrl, null);
+
+            // If the page is null it has already been crawled, don't return it and don't look for links
+            if (firstPage == null)
+                yield break;
+
             foreach (var lnk in firstPage.LinksInPage)
                 _links.Enqueue((lnk, firstPage));
             yield return firstPage;
@@ -123,6 +126,14 @@ namespace Scraper
                 await foreach (var (link, parent) in _links.WithCancellation(cancellationToken))
                 {
                     var page = await _pageLoader.LoadPageAsync(link, parent);
+                    // If the page is null it has already been crawled, don't return it and don't look for links
+                    if (page == null)
+                    {
+                        if (_links.Count == 0)
+                            break;
+
+                        continue;
+                    }
 
                     foreach (var lnk in page.LinksInPage)
                         _links.Enqueue((lnk, page));

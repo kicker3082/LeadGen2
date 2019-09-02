@@ -33,6 +33,7 @@ namespace Scraper.Tests
         Mock<INavigationLinkParser> _navLinkParser;
         Mock<IWebClient> _wc;
         PageLoader _loader;
+        PageLoaderDecoratorWithNoDupeUrls _noDupeLoader;
 
         static readonly string _noLinksStartingUrl = @"http://mydomain.com/startingpage";
         static readonly string _noContentUrl = _noLinksStartingUrl  + @"/nocontent";
@@ -45,12 +46,13 @@ namespace Scraper.Tests
         readonly string _link1Url = @"nav link 1";
         readonly string _link2Url = @"nav link 1";
 
+
+
         [SetUp]
         public void Setup()
         {
             _wc = new Mock<IWebClient>();
             _navLinkParser = new Mock<INavigationLinkParser>();
-           
 
             _wc.Setup(obj => obj.DownloadStringTaskAsync(It.IsAny<string>())).Returns<string>(url => Task.FromResult(
                 url == _noContentUrl ? string.Empty :
@@ -67,6 +69,7 @@ namespace Scraper.Tests
                 html == _twoLinksContent ? new[] { _link1Url, _link2Url } : Enumerable.Empty<string>()
             );
             _loader = new PageLoader(_wc.Object, _navLinkParser.Object);
+            _noDupeLoader = new PageLoaderDecoratorWithNoDupeUrls(_loader);
         }
 
         [Test]
@@ -171,6 +174,27 @@ namespace Scraper.Tests
             var nav = (ICrawler)new QueueCrawler(_loader);
             var pages = nav.CrawlWeb(_noLinksStartingUrl);
             Assert.That(pages.Count, Is.EqualTo(1));
+        }
+
+        [Test]
+        public void CrawlWeb_WithNoDupeLoader_StartingUrl_DuplicateFirstPageReturnsContent_ContentContainsNoLinks_ReturnsOnlyOnePage()
+        {
+            {
+                var nav = (ICrawler)new QueueCrawler(_loader);
+                var pages = nav.CrawlWeb(_noLinksStartingUrl);
+                var pages2 = nav.CrawlWeb(_noLinksStartingUrl);
+                Assert.That(pages.Count, Is.EqualTo(1));
+                Assert.That(pages2.Count, Is.EqualTo(1));
+            }
+
+            {
+                var nav = (ICrawler)new QueueCrawler(_noDupeLoader);
+                var pages = nav.CrawlWeb(_noLinksStartingUrl);
+                var pages2 = nav.CrawlWeb(_noLinksStartingUrl);
+                Assert.That(pages.Count, Is.EqualTo(1));
+                Assert.That(pages2.Count, Is.EqualTo(0));
+            }
+
         }
 
         [Test]
