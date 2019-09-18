@@ -13,14 +13,14 @@ namespace Scraper.Tests
         [Test]
         public void ctor()
         {
-            var parser = new ZillowNavigationLinkParserV1();
+            var parser = new ZillowListingSearchResultsPageParserV1();
             Assert.That(parser, Is.Not.Null);
         }
 
         [Test]
         public void ParseHtml_HtmlIsNull_Throws()
         {
-            var parser = (INavigationLinkParser) new ZillowNavigationLinkParserV1();
+            var parser = (INavigationLinkParser) new ZillowListingSearchResultsPageParserV1();
             var ex = Assert.Throws<ArgumentNullException>(() => parser.ParseHtml(null)) ;
 
             Assert.That(ex.ParamName, Is.EqualTo(@"html"));
@@ -29,7 +29,7 @@ namespace Scraper.Tests
         [Test]
         public void ParseHtml_HtmlIsEmpty_ReturnZeroLinks()
         {
-            var parser = (INavigationLinkParser)new ZillowNavigationLinkParserV1();
+            var parser = (INavigationLinkParser)new ZillowListingSearchResultsPageParserV1();
             var links = parser.ParseHtml("");
 
             Assert.That(links.Count(), Is.EqualTo(0));
@@ -38,7 +38,7 @@ namespace Scraper.Tests
         [Test]
         public void ParseHtml_HtmlContainsNoLinks_ReturnZeroLinks()
         {
-            var parser = (INavigationLinkParser)new ZillowNavigationLinkParserV1();
+            var parser = (INavigationLinkParser)new ZillowListingSearchResultsPageParserV1();
             var links = parser.ParseHtml(@"<html></html>");
 
             Assert.That(links.Count(), Is.EqualTo(0));
@@ -49,7 +49,7 @@ namespace Scraper.Tests
         {
             var testDataFile = Path.Combine(_testDataFolderPath, @"Amherst Real Estate - Amherst MA Homes For Sale _ Zillow.html");
             var html = File.ReadAllText(testDataFile);
-            var parser = (INavigationLinkParser)new ZillowNavigationLinkParserV1();
+            var parser = (INavigationLinkParser)new ZillowListingSearchResultsPageParserV1();
             var links = parser.ParseHtml(html);
             var hasNext = links.Contains(@"/amherst-ma/2_p/");
 
@@ -62,7 +62,7 @@ namespace Scraper.Tests
         {
             var testDataFile = Path.Combine(_testDataFolderPath, @"Amherst Real Estate - Amherst MA Homes For Sale _ Zillow.html");
             var html = File.ReadAllText(testDataFile);
-            var parser = (INavigationLinkParser)new ZillowNavigationLinkParserV1();
+            var parser = (INavigationLinkParser)new ZillowListingSearchResultsPageParserV1();
             var links = parser.ParseHtml(html);
 
             Assert.That(links.Count(), Is.EqualTo(41));

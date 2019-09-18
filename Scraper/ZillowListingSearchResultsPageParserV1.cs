@@ -10,7 +10,7 @@ using AngleSharp.Html.Dom;
 
 namespace Scraper
 {
-    public class ZillowNavigationLinkParserV1 : INavigationLinkParser
+    public class ZillowListingSearchResultsPageParserV1 : INavigationLinkParser
 
     {
         /// <summary>
