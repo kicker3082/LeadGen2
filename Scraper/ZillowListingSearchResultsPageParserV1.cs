@@ -31,12 +31,15 @@ namespace Scraper
                 throw new ArgumentNullException(nameof(html));
             if (html == "")
                 return Enumerable.Empty<string>();
-
+            
             var config = Configuration.Default;
             var context = BrowsingContext.New(config);
             var parser = context.GetService<IHtmlParser>();
             var document = parser.ParseDocument(html);
-
+            // checking to see if the page has a lightbox, which indicates that it is a listing page and not a navigation page
+            var hasBox = document.QuerySelectorAll(@"div#search-detail-lightbox").Any();
+            if(hasBox) 
+                return Enumerable.Empty<string>();
             // finding the listing links in the page
             var listingSelector = document.QuerySelectorAll(@"a.list-card-link").OfType<IHtmlAnchorElement>();
             var result = listingSelector.Select(a => a.Href);

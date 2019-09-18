@@ -69,6 +69,21 @@ namespace Scraper.Tests
 
         }
 
+        // test for giving the parser a listing page instead of a navigation page
+        [Test]
+        public void ParseHtml_ZillowListingPage_ReturnNoLinks()
+        {
+            var testDataFile = Path.Combine(_testDataFolderPath, @"57 Harkness Rd, Amherst, MA 01002 _ Zillow.html");
+            var html = File.ReadAllText(testDataFile);
+            var parser = (INavigationLinkParser)new ZillowListingSearchResultsPageParserV1();
+            var links = parser.ParseHtml(html);
+
+            Assert.That(links.Count(), Is.EqualTo(0));
+
+
+            
+        }
+
 
 
 
