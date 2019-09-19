@@ -7,6 +7,7 @@ using Scraper.Core;
 
 namespace Scraper.Tests
 {
+
     public class PageLoaderFixture
     {
 
