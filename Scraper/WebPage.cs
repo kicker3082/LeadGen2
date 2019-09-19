@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Net;
-using HtmlAgilityPack;
+using AngleSharp;
+using AngleSharp.Html.Dom;
+using AngleSharp.Html.Parser;
 
 namespace Scraper
 {
@@ -8,8 +10,11 @@ namespace Scraper
     {
         public static WebPage FromHtml(string html, string url)
         {
-            var doc = new HtmlDocument();
-            doc.LoadHtml(html);
+            var config = Configuration.Default;
+            var context = BrowsingContext.New(config);
+            var parser = context.GetService<IHtmlParser>();
+            var doc = parser.ParseDocument(html);
+
             var page = new WebPage(doc)
             {
                 Uri = new Uri(url),
@@ -17,27 +22,27 @@ namespace Scraper
 
             return page;
         }
-        public WebPage(HtmlDocument document, HttpWebRequest fromRequest) : this(document)
+        public WebPage(IHtmlDocument document, HttpWebRequest fromRequest) : this(document)
         {
             if (fromRequest != null)
                 Headers = fromRequest.Headers;
         }
 
-        public WebPage(HtmlDocument document)
+        public WebPage(IHtmlDocument document)
         {
             Document = document ?? throw new ArgumentNullException(nameof(document));
 
             Cookies = new CookieContainer();
-            var viewStateElement = document.GetElementbyId(@"__VIEWSTATE");
+            var viewStateElement = document.QuerySelector(@"#__VIEWSTATE");
             if (viewStateElement != null)
-                ViewState = viewStateElement.GetAttributeValue("value", string.Empty);
-            var eventElement = document.GetElementbyId(@"__EVENTVALIDATION");
+                ViewState = viewStateElement.GetAttribute("value", string.Empty);
+            var eventElement = document.QuerySelector(@"#__EVENTVALIDATION");
             if (eventElement != null)
-                EventData = eventElement.GetAttributeValue("value", string.Empty);
+                EventData = eventElement.GetAttribute("value", string.Empty);
         }
 
         public Uri Uri { get; set; }
-        public HtmlDocument Document { get; private set; }
+        public IHtmlDocument Document { get; private set; }
 
         public CookieContainer Cookies { get; set; }
         public string ViewState { get; set; }
@@ -49,7 +54,9 @@ namespace Scraper
         // ReSharper disable ArrangeTypeMemberModifiers
 
         // ReSharper disable once InconsistentNaming
+#pragma warning disable IDE1006 // Naming Styles
         private bool __alreadyDisposed;
+#pragma warning restore IDE1006 // Naming Styles
 
         public void Dispose()
         {

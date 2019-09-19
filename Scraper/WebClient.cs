@@ -7,8 +7,9 @@ using System.Linq;
 using System.Net;
 using System.Text;
 using System.Threading.Tasks;
+using AngleSharp;
+using AngleSharp.Html.Parser;
 using Creative.System.Core;
-using HtmlAgilityPack;
 using Scraper.Core;
 
 namespace Scraper
@@ -181,8 +182,10 @@ namespace Scraper
 
         static WebPage MakeWebPageFromHtml(string html, string cookies, Uri uri, HttpWebRequest request)
         {
-            var doc = new HtmlDocument();
-            doc.LoadHtml(html);
+            var config = Configuration.Default;
+            var context = BrowsingContext.New(config);
+            var parser = context.GetService<IHtmlParser>();
+            var doc = parser.ParseDocument(html);
             var page = new WebPage(doc, request);
             if (cookies != null)
                 page.Cookies.SetCookies(uri, cookies);

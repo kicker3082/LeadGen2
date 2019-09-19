@@ -27,7 +27,7 @@ namespace Scraper
         ///     The <paramref name="path" /> parameter is longer than the
         ///     system-defined maximum length.
         /// </exception>
-        public string GetDirectoryName(string path)
+        string IFileSystem.GetDirectoryName(string path)
         {
             throw new NotImplementedException();
         }
@@ -37,7 +37,7 @@ namespace Scraper
         /// </summary>
         /// <param name="path">The file to be opened for writing.</param>
         /// <returns>An unshared <see cref="FileStream" /> object on the specified path with Write access.</returns>
-        public FileStream OpenWrite(string path)
+        FileStream IFileSystem.OpenWrite(string path)
         {
             return File.OpenWrite(path);
         }
@@ -64,7 +64,7 @@ namespace Scraper
         /// <exception cref="IOException">The specified path is invalid (for example, it is on an unmapped drive).</exception>
         /// <exception cref="NotSupportedException">An I/O error occurred while creating the file.</exception>
         /// <exception cref="NotSupportedException"><paramref name="path" /> is in an invalid format.</exception>
-        public StreamReader OpenText(string path)
+        StreamReader IFileSystemOpenText(string path)
         {
             return File.OpenText(path);
         }
@@ -75,7 +75,7 @@ namespace Scraper
         /// </summary>
         /// <param name="path">The file to append the specified string to.</param>
         /// <param name="contents">The string to append to the file.</param>
-        public void AppendAllText(string path, string contents)
+        void IFileSystemAppendAllText(string path, string contents)
         {
             throw new NotImplementedException();
         }
@@ -102,7 +102,7 @@ namespace Scraper
         /// <exception cref="DirectoryNotFoundException">The specified path is invalid (for example, it is on an unmapped drive).</exception>
         /// <exception cref="IOException">An I/O error occurred while creating the file.</exception>
         /// <exception cref="NotSupportedException"><paramref name="path" /> is in an invalid format.</exception>
-        public FileStream Create(string path)
+        FileStream IFileSystemCreate(string path)
         {
             throw new NotImplementedException();
         }
@@ -112,7 +112,7 @@ namespace Scraper
         /// </summary>
         /// <param name="path">The path of the file.</param>
         /// <returns>A <see cref="FileInfo" /> object for the specified file.</returns>
-        public FileInfo GetFileInfo(string path)
+        FileInfo IFileSystemGetFileInfo(string path)
         {
             return new FileInfo(path);
         }
@@ -122,7 +122,7 @@ namespace Scraper
         /// </summary>
         /// <param name="path">The name of the empty directory to remove. This directory must be writable or empty.</param>
         /// <param name="deleteAllFiles">Delete all of the files in the directory before deleting the directory.</param>
-        public void DeleteDirectory(string path, bool deleteAllFiles)
+        void IFileSystemDeleteDirectory(string path, bool deleteAllFiles)
         {
             throw new NotImplementedException();
         }
@@ -131,7 +131,7 @@ namespace Scraper
         ///     Deletes a specified directory.
         /// </summary>
         /// <param name="path">The name of the empty directory to remove. This directory must be writable or empty.</param>
-        public void DeleteDirectory(string path)
+        void IFileSystemDeleteDirectory(string path)
         {
             throw new NotImplementedException();
         }
@@ -142,7 +142,7 @@ namespace Scraper
         /// </summary>
         /// <param name="path">The file to write to.</param>
         /// <param name="bytes">The bytes to write to the file.</param>
-        public void WriteAllBytes(string path, byte[] bytes)
+        void IFileSystemWriteAllBytes(string path, byte[] bytes)
         {
             throw new NotImplementedException();
         }
@@ -152,7 +152,7 @@ namespace Scraper
         /// </summary>
         /// <param name="path">The file to open for reading.</param>
         /// <returns>A byte array containing the contents of the file.</returns>
-        public byte[] ReadAllBytes(string path)
+        byte[] IFileSystemReadAllBytes(string path)
         {
             throw new NotImplementedException();
         }
@@ -163,7 +163,7 @@ namespace Scraper
         /// <param name="source">The name of the file to move</param>
         /// <param name="destination">New path for the file</param>
         /// <param name="overwrite">Indicates whether to overwrite a file with the same name in the destination.</param>
-        public void MoveFile(string source, string destination, bool overwrite)
+        void IFileSystemMoveFile(string source, string destination, bool overwrite)
         {
             if (overwrite && File.Exists(destination))
                 File.Delete(destination);
@@ -175,7 +175,7 @@ namespace Scraper
         /// </summary>
         /// <param name="path">The path to search</param>
         /// <returns>An enumeration of the complete paths to all files in the <paramref name="path" />.</returns>
-        public IEnumerable<string> GetFiles(string path)
+        IEnumerable<string> IFileSystemGetFiles(string path)
         {
             return Directory.EnumerateFiles(path);
         }
@@ -186,7 +186,7 @@ namespace Scraper
         /// <param name="path">The path to search</param>
         /// <param name="searchPattern">The search string, such as "*.txt"</param>
         /// <returns>An enumeration of the complete paths to files that match the <paramref name="searchPattern" />.</returns>
-        public IEnumerable<string> GetFiles(string path, string searchPattern)
+        IEnumerable<string> IFileSystemGetFiles(string path, string searchPattern)
         {
             throw new NotImplementedException();
         }
@@ -201,7 +201,7 @@ namespace Scraper
         ///     top-level path and all subdirectories.
         /// </param>
         /// <returns>An enumeration of the complete paths to files that match the <paramref name="searchPattern" />.</returns>
-        public IEnumerable<string> GetFiles(string path, string searchPattern, SearchOption searchOption)
+        IEnumerable<string> IFileSystemGetFiles(string path, string searchPattern, SearchOption searchOption)
         {
             throw new NotImplementedException();
         }
@@ -232,7 +232,7 @@ namespace Scraper
         ///     interpreted as relative to the current working directory. To obtain the current working directory, see
         ///     <seealso cref="Directory.GetCurrentDirectory">.<br />For a list of common I/O tasks, see Common I/O Tasks.</seealso>
         /// </remarks>
-        public void Delete(string path)
+        void IFileSystemDelete(string path)
         {
             File.Delete(path);
         }
@@ -242,7 +242,7 @@ namespace Scraper
         /// </summary>
         /// <param name="path">The file to be opened for reading</param>
         /// <returns>A <see cref="Stream" /> containing the contents of the file.</returns>
-        public Stream OpenRead(string path)
+        Stream IFileSystemOpenRead(string path)
         {
             return File.OpenRead(path);
         }
@@ -252,7 +252,7 @@ namespace Scraper
         /// </summary>
         /// <param name="path">The file to open for reading</param>
         /// <returns>A string array containing all lines of the file.</returns>
-        public string[] ReadAllLines(string path)
+        string[] IFileSystemReadAllLines(string path)
         {
             return File.ReadAllLines(path);
         }
@@ -262,7 +262,7 @@ namespace Scraper
         /// </summary>
         /// <param name="path">The file to open for reading</param>
         /// <returns>A string containing all lines of the file.</returns>
-        public string ReadAllText(string path)
+        string IFileSystemReadAllText(string path)
         {
             throw new NotImplementedException();
         }
@@ -272,7 +272,7 @@ namespace Scraper
         /// </summary>
         /// <param name="path">The file to check</param>
         /// <returns>True if the file is present. False otherwise.</returns>
-        public bool Exists(string path)
+        bool IFileSystemExists(string path)
         {
             return File.Exists(path);
         }
@@ -283,7 +283,7 @@ namespace Scraper
         /// </summary>
         /// <param name="path">The file to write to</param>
         /// <param name="contents">The string to write to the file</param>
-        public void WriteAllText(string path, string contents)
+        void IFileSystemWriteAllText(string path, string contents)
         {
             throw new NotImplementedException();
         }
@@ -295,7 +295,7 @@ namespace Scraper
         /// <param name="path">The file to write to</param>
         /// <param name="contents">The string to write to the file</param>
         /// <param name="encoding">An <see cref="Encoding" /> object that represents the encoding to apply to the string</param>
-        public void WriteAllText(string path, string contents, Encoding encoding)
+        void IFileSystemWriteAllText(string path, string contents, Encoding encoding)
         {
             File.WriteAllText(path, contents, encoding);
         }
@@ -343,7 +343,7 @@ namespace Scraper
         ///     You can use this method to create the contents for a collection class that takes an IEnumerable{T} in its
         ///     constructor, such as a List{T}, HashSet{T}, or a SortedSet{T} class.
         /// </remarks>
-        public void WriteAllLines(string path, IEnumerable<string> contents)
+        void IFileSystemWriteAllLines(string path, IEnumerable<string> contents)
         {
             throw new NotImplementedException();
         }
@@ -353,7 +353,7 @@ namespace Scraper
         /// </summary>
         /// <param name="path">The file to be opened for writing</param>
         /// <returns>A <see cref="StreamWriter" /> that writes to the specified file using UTF-8 encoding.</returns>
-        public StreamWriter CreateText(string path)
+        StreamWriter IFileSystemCreateText(string path)
         {
             throw new NotImplementedException();
         }
@@ -363,7 +363,7 @@ namespace Scraper
         /// </summary>
         /// <param name="path">The path to test.</param>
         /// <returns>true if path refers to an existing directory; otherwise, false.</returns>
-        public bool DirectoryExists(string path)
+        bool IFileSystemDirectoryExists(string path)
         {
             throw new NotImplementedException();
         }
@@ -373,7 +373,7 @@ namespace Scraper
         /// </summary>
         /// <param name="path">The directory path to create. </param>
         /// <returns>A <see cref="DirectoryInfo" /> as specified by path.</returns>
-        public DirectoryInfo CreateDirectory(string path)
+        DirectoryInfo IFileSystemCreateDirectory(string path)
         {
             throw new NotImplementedException();
         }
@@ -383,7 +383,7 @@ namespace Scraper
         /// </summary>
         /// <param name="path">The directory to create the <see cref="DirectoryInfo" /> value. </param>
         /// <returns>A <see cref="DirectoryInfo" /> as specified by path.</returns>
-        public DirectoryInfo GetDirectoryInfo(string path)
+        DirectoryInfo IFileSystemGetDirectoryInfo(string path)
         {
             return new DirectoryInfo(path);
         }
@@ -396,7 +396,7 @@ namespace Scraper
         ///     The path to the new location for sourceDirName. If sourceDirName is a file, then destDirName
         ///     must also be a file name.
         /// </param>
-        public void MoveDirectory(string sourceDirName, string destDirName)
+        void IFileSystemMoveDirectory(string sourceDirName, string destDirName)
         {
             throw new NotImplementedException();
         }
@@ -406,7 +406,7 @@ namespace Scraper
         /// </summary>
         /// <param name="sourceFileName">The file to copy.</param>
         /// <param name="destFileName">The name of the destination file. This cannot be a directory or an existing file.</param>
-        public void Copy(string sourceFileName, string destFileName)
+        void IFileSystemCopy(string sourceFileName, string destFileName)
         {
             File.Copy(sourceFileName, destFileName);
         }
@@ -430,7 +430,7 @@ namespace Scraper
         ///
         ///    For a list of common I/O tasks, see Common I/O Tasks.
         /// </remarks>
-        public string GetTempFileName()
+        string IFileSystemGetTempFileName()
         {
             return Path.GetTempFileName();
         }
@@ -442,22 +442,12 @@ namespace Scraper
         /// <remarks>The GetRandomFileName method returns a cryptographically strong, random string that can be used as either a folder name or a file name.
         /// Unlike GetTempFileName, GetRandomFileName does not create a file. When the security of your file system is paramount,
         /// this method should be used instead of GetTempFileName.</remarks>
-        public string GetRandomFileName()
+        string IFileSystemGetRandomFileName()
         {
             return Path.GetRandomFileName();
         }
 
         Task IFileSystem.WriteAllTextAsync(string path, string contents, Encoding encoding, CancellationToken cancellationToken)
-        {
-            throw new NotImplementedException();
-        }
-
-        string IFileSystem.GetDirectoryName(string path)
-        {
-            throw new NotImplementedException();
-        }
-
-        FileStream IFileSystem.OpenWrite(string path)
         {
             throw new NotImplementedException();
         }

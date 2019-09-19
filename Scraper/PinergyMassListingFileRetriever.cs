@@ -45,7 +45,9 @@ namespace Scraper
 
         };
 
+#pragma warning disable IDE1006 // Naming Styles
         const string download_fields =
+#pragma warning restore IDE1006 // Naming Styles
             @"PAll.ACRE,PALL.ADULT_COMMUNITY,PAll.ALERT_COMMENTS,SF.AMENITIES,PAll.ANT_SOLD_DATE,SF.APPLIANCES,PAll.AREA,PAll.ASSESSMENTS,PAll.BASEMENT,SF.BASEMENT_FEATURE,SF.BEACH_DESCRIPTION,SF.BEACH_MILES_TO,SF.BEACH_OWNERSHIP,PAll.BEACHFRONT_FLAG,SF.BED2_DIMEN,SF.BED2_DSCRP,SF.BED2_LEVEL,SF.BED3_DIMEN,SF.BED3_DSCRP,SF.BED3_LEVEL,SF.BED4_DIMEN,SF.BED4_DSCRP,SF.BED4_LEVEL,SF.BED5_DIMEN,SF.BED5_DSCRP,SF.BED5_LEVEL,PAll.BLOCK,PAll.BOOK,SF.BTH1_DIMEN,SF.BTH1_DSCRP,SF.BTH1_LEVEL,SF.BTH2_DIMEN,SF.BTH2_DSCRP,SF.BTH2_LEVEL,SF.BTH3_DIMEN,SF.BTH3_DSCRP,SF.BTH3_LEVEL,PAll.BUYER_BROKER_COMP,PAll.CERTIFICATE_NUMBER,SF.COLOR,PALL.COMP_BASED_ON,SF.CONSTRUCTION,PALL.CONTINGENCY_TYPE,SF.COOLING,SF.COOLING_ZONES,PALL.OFFER_TIME,SF.DIN_DIMEN,SF.DIN_DSCRP,SF.DIN_LEVEL,PAll.DIRECTION,PAll.DISCLOSURE,PALL.DISCLOSURES,PALL.DPR_Flag,SF.ELECTRIC_FEATURE,SF.ENERGY_FEATURES,PAll.ENTRY_ONLY,PALL.EXCLUSIONS,SF.EXTERIOR,SF.EXTERIOR_FEATURES,SF.FACING_DIRECTION,SF.FAM_DIMEN,SF.FAM_DSCRP,SF.FAM_LEVEL,PAll.FIN_CODE,PAll.FIRE_PLACES,PAll.FIRM_RMK1,SF.FLOORING,SF.FOUNDATION,SF.FOUNDATION_SIZE,PAll.FRONTAGE,SF.GARAGE_PARKING,SF.GARAGE_SPACES,PAll.GRADE_SCHOOL,SF.GREEN_CERTIFICATION,SF.GREEN_CERTIFIED,SF.HANDICAP_ACCESS,SF.HANDICAP_AMENITIES,SF.HEAT_ZONES,SF.HEATING,PALL.HERS_COMPLETION_DATE,PALL.HERS_INDEX_SCORE,PAll.HIGH_SCHOOL,SF.HOA_FEE,SF.HOME_OWN_ASSOCIATION,SF.HOT_WATER,PALL.HOW_SHOWN_BB,PALL.HOW_SHOWN_FB,PALL.HOW_SHOWN_SB,SF.INSULATION_FEATURE,SF.INTERIOR_FEATURES,SF.KIT_DIMEN,SF.KIT_DSCRP,SF.KIT_LEVEL,SF.LAUNDRY_DIMEN,SF.LAUNDRY_DSCRP,SF.LAUNDRY_LEVEL,SF.LEAD_PAINT,PAll.LENDER_OWNED,PAll.LIST_AGENT,MEMBER.LIST_AGENT_NAME,MEMBER.LIST_AGENT_PHONE,PAll.LIST_DATE,PAll.LIST_DATE_RCVD,PAll.LIST_NO,PAll.LIST_OFFICE,OFFICE.LIST_OFFICE_NAME,OFFICE.LIST_OFFICE_PHONE,PAll.LIST_PRICE,PAll.LISTING_AGREEMENT,PAll.LISTING_ALERT,SF.LIV_DIMEN,SF.LIV_DSCRP,SF.LIV_LEVEL,PAll.LOT,SF.LOT_DESCRIPTION,PALL.LOT_SIZE,PAll.MAIN_LO,PAll.MAIN_SO,PAll.MAP,PAll.MARKET_TIME,PAll.MARKET_TIME_BROKER,PAll.MARKET_TIME_PROPERTY,PAll.MASTER_BATH,SF.MBR_DIMEN,SF.MBR_DSCRP,SF.MBR_LEVEL,PAll.MIDDLE_SCHOOL,PALL.NEIGHBORHOOD,PAll.NO_BEDROOMS,PAll.NO_FULL_BATHS,PAll.NO_HALF_BATHS,PAll.NO_ROOMS,PAll.OFF_MKT_DATE,PALL.OFFER_DATE,PAll.ORIG_PRICE,SF.OTH1_DIMEN,SF.OTH1_DSCRP,SF.OTH1_LEVEL,SF.OTH1_ROOM_NAME,SF.OTH2_DIMEN,SF.OTH2_DSCRP,SF.OTH2_LEVEL,SF.OTH2_ROOM_NAME,SF.OTH3_DIMEN,SF.OTH3_DSCRP,SF.OTH3_LEVEL,SF.OTH3_ROOM_NAME,SF.OTH4_DIMEN,SF.OTH4_DSCRP,SF.OTH4_LEVEL,SF.OTH4_ROOM_NAME,SF.OTH5_DIMEN,SF.OTH5_DSCRP,SF.OTH5_LEVEL,SF.OTH5_ROOM_NAME,SF.OTH6_DIMEN,SF.OTH6_DSCRP,SF.OTH6_LEVEL,SF.OTH6_ROOM_NAME,PAll.OTHER_AGENT_COMP,PAll.PAGE,PAll.PARCEL_NUMBER,SF.PARKING_FEATURE,SF.PARKING_SPACES,PAll.PHOTO_DATE,PAll.PHOTO_MASK,PAll.PRICE_PER_SQFT,PAll.PROP_TYPE,PAll.REMARKS,SF.REQD_OWN_ASSOCIATION,SF.ROAD_TYPE,SF.ROOF_MATERIAL,PAll.SALE_AGENT,MEMBER.SALE_AGENT_NAME,MEMBER.SALE_AGENT_PHONE,PAll.SALE_OFFICE,OFFICE.SALE_OFFICE_NAME,OFFICE.SALE_OFFICE_PHONE,PAll.SALE_PRICE,PAll.SELLER_CONCESSIONS_AT_CLOSING,PAll.SELLER_DISCOUNT_PTS,PAll.SELLING_BROKER_COMP,PAll.SETTLED_DATE,SF.SEWAGE_DISTRICT,SF.SEWER,SF.SF_TYPE,PAll.SHORT_SALE_LENDER_APP_REQD,PAll.SHOW_INSTRUCTION,PAll.SOLD_VS_RENT,PAll.SQUARE_FEET,PALL.SQUARE_FEET_DISCLOSURES,PALL.SQUARE_FEET_INCL_BASE,PAll.SQUARE_FEET_SOURCE,PAll.STATUS,PAll.STATUS_DATE,PAll.STREET_NAME,PAll.STREET_NO,SF.STYLE,PAll.TAX_YEAR,PAll.TAXES,PAll.TEAM_MEMBER,SF.TERMS_FEATURE,SF.TITLE5,PAll.TOWN_NUM,SF.UFFI,PAll.UNIT_NO,PAll.UPDATE_DATE,SF.UTILITY_CONNECTIONS,SF.WARRANTY,SF.WATER,SF.WATERFRONT,PAll.WATERFRONT_FLAG,SF.WATERVIEW_FEATURES,PALL.WATERVIEW_FLAG,PAll.YEAR_BUILT,PAll.YEAR_BUILT_DESCRP,PAll.YEAR_BUILT_SOURCE,SF.YEAR_ROUND,PAll.ZIP_CODE,PAll.ZIP_CODE_4,PAll.ZONING,";
 
         public PinergyMassListingFileRetriever(IFileSystem file)
@@ -73,30 +75,30 @@ namespace Scraper
 
             var loggedInPage = _lastWebPage = _webClient.Post(new Uri($@"https://{_urlHost}/validate_new.asp"), formData);
 
-            var dupeLogIndindicator = loggedInPage.Document.DocumentNode.OuterHtml.Contains(@"Login Violation Notice");
+            var dupeLogIndindicator = loggedInPage.Document.TextContent.Contains(@"Login Violation Notice");
 
             // If we have received the log in violation page, one more get request is needed to get to the logged-in page
             if (dupeLogIndindicator)
                 loggedInPage = _lastWebPage = _webClient.GetPage(new Uri($@"https://{_urlHost}/home.asp"));
 
-            var searchPageLinks = loggedInPage.Document.DocumentNode.SelectNodes(@".//a[@title=' Search MLS Listings ']");
+            var searchPageLinks = loggedInPage.Document.QuerySelectorAll(@".//a[@title=' Search MLS Listings ']");
             var searchListingsNoMapRelativeUrl = searchPageLinks[0].Attributes["href"].Value;
 
             // Go to the search page
             var searchPageFrameSet =
                 _lastWebPage = _webClient.GetPage(new Uri($@"https://{_urlHost}{searchListingsNoMapRelativeUrl}"));
 
-            var searchPageTopFrameNode = searchPageFrameSet.Document.DocumentNode.SelectSingleNode(@".//frame[@name='TopFrame']");
+            var searchPageTopFrameNode = searchPageFrameSet.Document.QuerySelector(@".//frame[@name='TopFrame']");
             var searchPageUrl = searchPageTopFrameNode.Attributes[@"src"].Value;
 
             var searchPage = _lastWebPage = _webClient.GetPage(new Uri($@"https://{_urlHost}/search/{searchPageUrl}"));
 
             // Sort through the options in the drop-down
-            var searchOption = searchPage.Document.DocumentNode.SelectSingleNode(@".//select[@name='SavedSearchId']");
+            var searchOption = searchPage.Document.QuerySelector(@".//select[@name='SavedSearchId']");
 
-            var searchItems = searchOption.SelectNodes(@"./option")?.Select(n => new
+            var searchItems = searchOption.QuerySelectorAll(@"./option")?.Select(n => new
             {
-                Name = n.NextSibling?.InnerText?.Trim('\r', '\n', '\t'),
+                Name = n.NextSibling?.TextContent?.Trim('\r', '\n', '\t'),
                 Value = n.Attributes[@"value"]?.Value
             }).Where(n => _searchNames.Contains(n.Name));
 
@@ -116,7 +118,7 @@ namespace Scraper
 
                 // Load the hidden inputs into the appropriate post values
 
-                var hiddenInputs = searchResultPage.Document.DocumentNode.SelectNodes(@".//input[@type='hidden']");
+                var hiddenInputs = searchResultPage.Document.QuerySelectorAll(@".//input[@type='hidden']");
                 var values = hiddenInputs.Select(n => new
                 {
                     Name = n.Attributes["name"].Value,
@@ -137,7 +139,7 @@ namespace Scraper
 
                 // Compile a list of the returned items
 
-                var searchResultsListingItemNodes = lastSearchResults.Document.DocumentNode.SelectNodes(@".//input[@name='marked']");
+                var searchResultsListingItemNodes = lastSearchResults.Document.QuerySelectorAll(@".//input[@name='marked']");
                 var listingNumbers = searchResultsListingItemNodes.Select(n => n.Attributes["value"].Value).ToArray();
                 var sb = new StringBuilder();
 

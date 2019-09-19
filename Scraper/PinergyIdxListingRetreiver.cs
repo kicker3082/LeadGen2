@@ -45,6 +45,9 @@ namespace Scraper
                     var statusDate = startDateNoTime.AddDays(d);
                     var filename = string.Format($"{statusDate:yyyyMMdd}_all_state_{filter.status}_{filter.propType}.csv");
 
+
+                    // await and download the file here!!
+
                     yield return filename;
                 }
         }
