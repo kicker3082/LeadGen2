@@ -224,8 +224,8 @@
         <tr>
             <td width="100%" height="100%" >
                 <form name="loginform" method="POST" action="validate_new.asp" style="margin: 0px">
-                    <input name="cmwtnsxjvalidcmjgqfnv" value="DT: 9/2/2019 11:00:30 AM" type="hidden">
-                    <input name="Page_Loaded" value="DT: 9/2/2019 11:00:30 AM" type="hidden">
+                    <input name="orpkvcxbvalidhapwmjrm" value="DT: 9/3/2019 10:50:49 AM" type="hidden">
+                    <input name="Page_Loaded" value="DT: 9/3/2019 10:50:49 AM" type="hidden">
                     <table border="0" cellspacing="0" cellpadding="0" class="mls-login">
                         
                         <tr>
@@ -305,7 +305,7 @@
         </div>
 
         <div class="vert-bar">|</div>
-        <div class="footer-user-count">1724 users online right now!</div>
+        <div class="footer-user-count">3934 users online right now!</div>
     </div>
 </footer>
 

@@ -4,4 +4,12 @@
     <TargetFramework>netcoreapp3.0</TargetFramework>
   </PropertyGroup>
 
+  <ItemGroup>
+    <PackageReference Include="HtmlAgilityPack" Version="1.11.12" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Creative.System.Core\Creative.System.Core.csproj" />
+  </ItemGroup>
+
 </Project>

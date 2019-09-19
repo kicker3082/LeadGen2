@@ -1,10 +1,60 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Net;
 using System.Threading.Tasks;
 
 namespace Scraper.Core
 {
     public interface IWebClient
     {
+        /// <summary>
+        /// Downloads the resource with the specified URI to a local file.
+        /// </summary>
+        /// <param name="uri">The address from which to download data.</param>
+        /// <param name="filename">The name of the local file that is to receive the data.</param>
+        void DownloadFile(Uri uri, string filename);
+        /// <summary>
+        /// Downloads the html at the specified address into a file.
+        /// </summary>
+        /// <param name="uri"></param>
+        /// <param name="filename">The name of the file that will contain the
+        ///     downloaded html.</param>
+        WebPage DownloadPageIntoFile(Uri uri, string filename);
+
+        /// <summary>
+        /// GETs a webpage at the specified uri
+        /// </summary>
+        /// <param name="uri"></param>
+        /// <returns></returns>
+        WebPage GetPage(Uri uri);
+
+        /// <summary>
+        /// GETs a webpage at the specified uri
+        /// </summary>
+        /// <param name="uri"></param>
+        /// <param name="cookies"></param>
+        /// <returns></returns>
+        WebPage GetPageWithAdditionalCookies(Uri uri, CookieCollection cookies);
+
+        /// <summary>
+        /// GET's a webpage without blocking. Page is available in the Document property.
+        /// </summary>
+        /// <param name="uri"></param>
+        Task<WebPage> GetPageAsync(Uri uri);
+
+        /// <summary>
+        /// POSTs to the specified uri
+        /// </summary>
+        /// <param name="uri"></param>
+        /// <param name="postBackData"></param>
+        /// <returns></returns>
+        WebPage Post(Uri uri, IWebPostbackData postBackData);
+
+        string PostRaw(Uri uri, IWebPostbackData postbackData);
+
+        IWebClient WithAdditionalCookies(CookieCollection cookies);
+        string PostRaw(Uri uri, IWebPostbackData postbackData, IDictionary<string, string> additionalHeaders, bool keepAlive);
+
         //
         // Summary:
         //     Downloads the requested resource as a System.String. The resource to download
