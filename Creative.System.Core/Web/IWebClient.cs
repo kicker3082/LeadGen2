@@ -3,8 +3,9 @@ using System.Collections.Generic;
 using System.Net;
 using System.Threading.Tasks;
 
-namespace Scraper.Core
+namespace Creative.System.Core.Web
 {
+
     public interface IWebClient
     {
         /// <summary>
@@ -19,14 +20,14 @@ namespace Scraper.Core
         /// <param name="uri"></param>
         /// <param name="filename">The name of the file that will contain the
         ///     downloaded html.</param>
-        WebPage DownloadPageIntoFile(Uri uri, string filename);
+        IWebPage DownloadPageIntoFile(Uri uri, string filename);
 
         /// <summary>
         /// GETs a webpage at the specified uri
         /// </summary>
         /// <param name="uri"></param>
         /// <returns></returns>
-        WebPage GetPage(Uri uri);
+        IWebPage GetPage(Uri uri);
 
         /// <summary>
         /// GETs a webpage at the specified uri
@@ -34,13 +35,13 @@ namespace Scraper.Core
         /// <param name="uri"></param>
         /// <param name="cookies"></param>
         /// <returns></returns>
-        WebPage GetPageWithAdditionalCookies(Uri uri, CookieCollection cookies);
+        IWebPage GetPageWithAdditionalCookies(Uri uri, CookieCollection cookies);
 
         /// <summary>
         /// GET's a webpage without blocking. Page is available in the Document property.
         /// </summary>
         /// <param name="uri"></param>
-        Task<WebPage> GetPageAsync(Uri uri);
+        Task<IWebPage> GetPageAsync(Uri uri);
 
         /// <summary>
         /// POSTs to the specified uri
@@ -48,7 +49,7 @@ namespace Scraper.Core
         /// <param name="uri"></param>
         /// <param name="postBackData"></param>
         /// <returns></returns>
-        WebPage Post(Uri uri, IWebPostbackData postBackData);
+        IWebPage Post(Uri uri, IWebPostbackData postBackData);
 
         string PostRaw(Uri uri, IWebPostbackData postbackData);
 

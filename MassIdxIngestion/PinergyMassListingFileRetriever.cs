@@ -5,9 +5,11 @@ using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using Creative.System.Core;
+using Creative.System.Core.Web;
+using Scraper;
 using Scraper.Core;
 
-namespace Scraper
+namespace MassIdxIngestion
 {
 
     public class PinergyMassListingFileRetriever : IDisposable
@@ -57,7 +59,7 @@ namespace Scraper
 
         public void GetFilesFromBoard()
         {
-            var signInPage = _lastWebPage = _webClient.GetPage(new Uri(@"https://h3w.mlspin.com/signin.asp"));
+            var signInPage = _lastWebPage = (WebPage)_webClient.GetPage(new Uri(@"https://h3w.mlspin.com/signin.asp"));
 
             _urlHost = signInPage.Uri.Host;
 
@@ -70,28 +72,28 @@ namespace Scraper
                 {@"SavePassword", @"Y"},
                 //{@"signin", @"Sign In"},
             };
-            var formData = GenericASPWebPostBackData.FromPage(signInPage, $@"https://{_urlHost}/validate_new.asp",
+            var formData = GenericASPWebPostBackData.FromPage((IWebPage)signInPage, $@"https://{_urlHost}/validate_new.asp",
                 formDataValues);
 
-            var loggedInPage = _lastWebPage = _webClient.Post(new Uri($@"https://{_urlHost}/validate_new.asp"), formData);
+            var loggedInPage = _lastWebPage = (WebPage)_webClient.Post(new Uri($@"https://{_urlHost}/validate_new.asp"), formData);
 
             var dupeLogIndindicator = loggedInPage.Document.TextContent.Contains(@"Login Violation Notice");
 
             // If we have received the log in violation page, one more get request is needed to get to the logged-in page
             if (dupeLogIndindicator)
-                loggedInPage = _lastWebPage = _webClient.GetPage(new Uri($@"https://{_urlHost}/home.asp"));
+                loggedInPage = _lastWebPage = (WebPage)_webClient.GetPage(new Uri($@"https://{_urlHost}/home.asp"));
 
             var searchPageLinks = loggedInPage.Document.QuerySelectorAll(@".//a[@title=' Search MLS Listings ']");
             var searchListingsNoMapRelativeUrl = searchPageLinks[0].Attributes["href"].Value;
 
             // Go to the search page
             var searchPageFrameSet =
-                _lastWebPage = _webClient.GetPage(new Uri($@"https://{_urlHost}{searchListingsNoMapRelativeUrl}"));
+                _lastWebPage = (WebPage)_webClient.GetPage(new Uri($@"https://{_urlHost}{searchListingsNoMapRelativeUrl}"));
 
             var searchPageTopFrameNode = searchPageFrameSet.Document.QuerySelector(@".//frame[@name='TopFrame']");
             var searchPageUrl = searchPageTopFrameNode.Attributes[@"src"].Value;
 
-            var searchPage = _lastWebPage = _webClient.GetPage(new Uri($@"https://{_urlHost}/search/{searchPageUrl}"));
+            var searchPage = _lastWebPage = (WebPage)_webClient.GetPage(new Uri($@"https://{_urlHost}/search/{searchPageUrl}"));
 
             // Sort through the options in the drop-down
             var searchOption = searchPage.Document.QuerySelector(@".//select[@name='SavedSearchId']");
@@ -114,7 +116,7 @@ namespace Scraper
                 var searchUrl = $@"/search/editsavedsearch.asp?sid=&cid=&savedsearchid={search.Value}";
                 var searchUri = new Uri($@"https://{_urlHost}{searchUrl}");
 
-                var searchResultPage = _lastSearchWebPage = _webClient.GetPage(searchUri);
+                var searchResultPage = _lastSearchWebPage = (WebPage)_webClient.GetPage(searchUri);
 
                 // Load the hidden inputs into the appropriate post values
 
@@ -132,10 +134,10 @@ namespace Scraper
                     searchFormCollection.Add(formValue.Name, formValue.Value);
 
                 var searchResultsUri = new Uri($@"https://{_urlHost}/search/results.asp");
-                var searchFormData = GenericASPWebPostBackData.FromPage(searchResultPage, searchResultsUri.AbsoluteUri, searchFormCollection);
+                var searchFormData = GenericASPWebPostBackData.FromPage((IWebPage)searchResultPage, searchResultsUri.AbsoluteUri, searchFormCollection);
 
 
-                var lastSearchResults = _lastSearchResultsPage = _webClient.Post(searchResultsUri, searchFormData);
+                var lastSearchResults = _lastSearchResultsPage = (WebPage)_webClient.Post(searchResultsUri, searchFormData);
 
                 // Compile a list of the returned items
 
@@ -162,7 +164,7 @@ namespace Scraper
                 };
 
                 var downloadUri = new Uri($@"https://{_urlHost}/search/Download_Reports.asp");
-                var downloadFormData = GenericASPWebPostBackData.FromPage(lastSearchResults, downloadUri.AbsoluteUri, downloadFormCollection);
+                var downloadFormData = GenericASPWebPostBackData.FromPage((IWebPage)lastSearchResults, downloadUri.AbsoluteUri, downloadFormCollection);
 
                 var domain = $@"https://{downloadUri.Host}";
                 var referer = $@"{domain}/search/Download_Select.asp";

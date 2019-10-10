@@ -6,6 +6,7 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using Creative.System.Core;
+using MassIdxIngestion;
 using Moq;
 using NUnit.Framework;
 using Scraper.Core;

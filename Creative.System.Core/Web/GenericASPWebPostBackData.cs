@@ -1,8 +1,9 @@
 ﻿using System;
 using System.Collections.Specialized;
 using System.Net;
+using Creative.System.Core.Web;
 
-namespace Scraper
+namespace Creative.System.Core.Web
 {
     public class GenericASPWebPostBackData : IWebPostbackData
     {
@@ -12,7 +13,7 @@ namespace Scraper
         public string EventData { get; set; }
         public NameValueCollection Data { get; set; }
 
-        public static IWebPostbackData FromPage(WebPage page, string url, NameValueCollection values = null)
+        public static IWebPostbackData FromPage(IWebPage page, string url, NameValueCollection values = null)
         {
             var postData = new GenericASPWebPostBackData
             {

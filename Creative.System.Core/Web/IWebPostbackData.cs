@@ -2,7 +2,7 @@
 using System.Collections.Specialized;
 using System.Net;
 
-namespace Scraper
+namespace Creative.System.Core.Web
 {
     public interface IWebPostbackData
     {

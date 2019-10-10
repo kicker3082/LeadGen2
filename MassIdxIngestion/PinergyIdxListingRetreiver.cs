@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Threading;
+using System.Threading.Tasks;
 
-namespace Scraper
+namespace MassIdxIngestion
 {
 
     /// <summary>
@@ -45,7 +47,7 @@ namespace Scraper
                     var statusDate = startDateNoTime.AddDays(d);
                     var filename = string.Format($"{statusDate:yyyyMMdd}_all_state_{filter.status}_{filter.propType}.csv");
 
-
+                    await Task.Run(() => Thread.Sleep(1));
                     // await and download the file here!!
 
                     yield return filename;

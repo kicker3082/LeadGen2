@@ -4,4 +4,9 @@
     <TargetFramework>netcoreapp3.0</TargetFramework>
   </PropertyGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\Creative.System.Core\Creative.System.Core.csproj" />
+    <ProjectReference Include="..\Scraper\Scraper.csproj" />
+  </ItemGroup>
+
 </Project>

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Threading.Tasks;
+using Creative.System.Core.Web;
 using Scraper.Core;
 
 namespace Scraper

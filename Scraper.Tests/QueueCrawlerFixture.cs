@@ -1,6 +1,7 @@
 using System;
 using System.Linq;
 using System.Threading.Tasks;
+using Creative.System.Core.Web;
 using Moq;
 using NUnit.Framework;
 using Scraper.Core;

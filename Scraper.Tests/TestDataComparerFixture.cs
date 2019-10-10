@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Net;
 using System.Threading.Tasks;
+using MassIdxIngestion;
 using Moq;
 using NUnit.Framework;
 using Scraper.Core;

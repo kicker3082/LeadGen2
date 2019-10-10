@@ -10,6 +10,7 @@ using System.Threading.Tasks;
 using AngleSharp;
 using AngleSharp.Html.Parser;
 using Creative.System.Core;
+using Creative.System.Core.Web;
 using Scraper.Core;
 
 namespace Scraper
@@ -74,7 +75,7 @@ namespace Scraper
 
         readonly CookieAwareWebClient _cookieAwareWebClient;
 
-        public WebPage GetPageWithAdditionalCookies(Uri uri, CookieCollection cookies)
+        public IWebPage GetPageWithAdditionalCookies(Uri uri, CookieCollection cookies)
         {
             var container = new CookieContainer();
             container.Add(cookies);
@@ -100,7 +101,7 @@ namespace Scraper
             _file.Copy(tempFile, filename);
         }
 
-        public WebPage DownloadPageIntoFile(Uri uri, string filename)
+        public IWebPage DownloadPageIntoFile(Uri uri, string filename)
         {
             var content = _cookieAwareWebClient.DownloadString(uri);
             var encoding = _cookieAwareWebClient.ResponseHeaders[HttpResponseHeader.ContentEncoding];
@@ -110,7 +111,7 @@ namespace Scraper
             return page;
         }
 
-        public virtual async Task<WebPage> GetPageAsync(Uri uri)
+        public virtual async Task<IWebPage> GetPageAsync(Uri uri)
         {
             var content = await _cookieAwareWebClient.DownloadStringTaskAsync(uri);
             var uriOfResponse = _cookieAwareWebClient.UriAfterRedirect ?? uri;
@@ -119,7 +120,7 @@ namespace Scraper
                 _cookieAwareWebClient.ResponseHeaders[HttpResponseHeader.SetCookie], uriOfResponse, _cookieAwareWebClient.Request);
             return page;
         }
-        public virtual WebPage GetPage(Uri uri)
+        public virtual IWebPage GetPage(Uri uri)
 
         {
             var content = _cookieAwareWebClient.DownloadString(uri);
@@ -172,7 +173,7 @@ namespace Scraper
         }
 
 
-        public WebPage Post(Uri uri, IWebPostbackData postbackData)
+        public IWebPage Post(Uri uri, IWebPostbackData postbackData)
         {
             var content = PostRaw(uri, postbackData, null, true);
             var uriOfResponse = _cookieAwareWebClient.UriAfterRedirect;
@@ -180,13 +181,13 @@ namespace Scraper
             return page;
         }
 
-        static WebPage MakeWebPageFromHtml(string html, string cookies, Uri uri, HttpWebRequest request)
+        static IWebPage MakeWebPageFromHtml(string html, string cookies, Uri uri, HttpWebRequest request)
         {
             var config = Configuration.Default;
             var context = BrowsingContext.New(config);
             var parser = context.GetService<IHtmlParser>();
             var doc = parser.ParseDocument(html);
-            var page = new WebPage(doc, request);
+            var page = (IWebPage)new WebPage(doc, request);
             if (cookies != null)
                 page.Cookies.SetCookies(uri, cookies);
 

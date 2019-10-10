@@ -15,6 +15,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Creative.System.Core\Creative.System.Core.csproj" />
+    <ProjectReference Include="..\MassIdxIngestion\MassIdxIngestion.csproj" />
     <ProjectReference Include="..\Scraper\Scraper.csproj" />
   </ItemGroup>
 
