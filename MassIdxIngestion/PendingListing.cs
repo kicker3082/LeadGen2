@@ -5,6 +5,12 @@
     /// </summary>
     public class PendingListing
     {
+        /// <summary>
+        /// Captures the identifier received from the source of the data
+        /// prepended with the identifier of the source.
+        /// Ex: ZLW::7655288 - the pair of colons delimit the source from the id
+        /// </summary>
+        public string Id { get; set; }
         public string PROP_TYPE { get; set; }
         public string LIST_NO { get; set; }
         public string STATUS { get; set; }
