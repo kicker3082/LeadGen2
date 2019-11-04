@@ -6,7 +6,7 @@ using System.Linq;
 
 namespace Scraper.Tests
 {
-    public class ZillowNavigationLinkParserV1Fixture
+    public class ZillowListingSearchResultsPageParserV1Fixture
     {
 
         readonly static string _testDataFolderPath = TestHelper.GetFullPathToFile(@"TestData");
@@ -80,22 +80,6 @@ namespace Scraper.Tests
 
             Assert.That(links.Count(), Is.EqualTo(0));
 
-
-            
         }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
     }
 }
