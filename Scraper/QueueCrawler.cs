@@ -4,6 +4,7 @@ using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Threading;
 using System.Threading.Tasks;
+using Creative.System.Core;
 using Scraper.Core;
 
 namespace Scraper
@@ -16,19 +17,18 @@ namespace Scraper
     /// Crawling is implemented by iterating over a queue to which newly discovered links for further
     /// crawling are added. This should be more efficient than recursively crawling and is much easier to
     /// implement asynchronously.
-
-    // This is the flag indicating that we should stop waiting for more links to appear in the queue.
-    // It is set after any links on the current page are added to the queue. Because there
-    // is only one queue, if there are no more items on it after the current page is parsed and
-    // (zero) discovered links added, there will never be any more links and we're done.
-    //
-    // Even when considering a graph with many leaf nodes - there will always be items in
-    // the queue if any page has not been yet downloaded and parsed, so the flag will be 
-    // remain false. The only time that the queue is truly empty (after the root page has 
-    // been parsed and discovered links added to the queue), is when all lead pages have been 
-    // parsed and contain no additional links. When the last one of these is parsed and 
-    // no links discovered, then we're done.
-
+    ///
+    /// This is the flag indicating that we should stop waiting for more links to appear in the queue.
+    /// It is set after any links on the current page are added to the queue. Because there
+    /// is only one queue, if there are no more items on it after the current page is parsed and
+    /// (zero) discovered links added, there will never be any more links and we're done.
+    ///
+    /// Even when considering a graph with many leaf nodes - there will always be items in
+    /// the queue if any page has not been yet downloaded and parsed, so the flag will be 
+    /// remain false. The only time that the queue is truly empty (after the root page has 
+    /// been parsed and discovered links added to the queue), is when all lead pages have been 
+    /// parsed and contain no additional links. When the last one of these is parsed and 
+    /// no links discovered, then we're done.
     /// </remarks>
     public class QueueCrawler : ICrawler
     {

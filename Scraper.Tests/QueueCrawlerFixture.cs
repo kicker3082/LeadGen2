@@ -8,28 +8,10 @@ using Scraper.Core;
 
 namespace Scraper.Tests
 {
-
-    public class PageLoaderFixture
+    public class QueueCrawlerWithTimingFixture
     {
-
-        //[Test]
-        //public void Ctor_NullWebClient_Throws()
-        //{
-        //    var ex = Assert.Throws<ArgumentNullException>(() => new QueueCrawler(null, _navLinkParser.Object));
-        //    Assert.That(ex.ParamName, Is.EqualTo(@"webClient"));
-        //}
-
-        //[Test]
-        //public void Ctor_NullNavLinkParser_Throws()
-        //{
-        //    var ex = Assert.Throws<ArgumentNullException>(() => new QueueCrawler(_wc.Object, null));
-        //    Assert.That(ex.ParamName, Is.EqualTo(@"navigationLinkParser"));
-        //}
-
-
-
-
     }
+
     public class QueueCrawlerFixture
     {
         Mock<INavigationLinkParser> _navLinkParser;
@@ -77,12 +59,10 @@ namespace Scraper.Tests
         [Test]
         public void Ctor()
         {
-            
             new QueueCrawler(_loader);
             Assert.Pass();
         }
 
-        
         [Test]
         public void CrawlWeb_StartingUrl_Null_Throws()
         {
