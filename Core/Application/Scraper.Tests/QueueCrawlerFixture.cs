@@ -53,14 +53,17 @@ namespace Scraper.Tests
     public class QueueCrawlerWithTimingFixture : QueueCrawlerFixtureBase
     {
         [Test]
-        public async void InterceptCrawlAsync()
+        public void InterceptCrawlAsync()
         {
-            var crawler = (ICrawler)new QueueCrawler(Loader);
-            await foreach (var p in crawler.CrawlWebAsync(TwoLinkStartingUrl))
+            Task.Run(async () =>
             {
+                var crawler = (ICrawler)new QueueCrawler(Loader);
+                await foreach (var p in crawler.CrawlWebAsync(TwoLinkStartingUrl))
+                {
 
-            };
-
+                };
+            }
+            ).Wait();
         }
     }
 
