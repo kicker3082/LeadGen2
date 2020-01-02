@@ -12,8 +12,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Creative.LeadGen.Observable\Creative.LeadGen.Observable.csproj" />
-    <ProjectReference Include="..\Creative.System.Core\Creative.System.Core.csproj" />
+    <ProjectReference Include="..\Infrastructure\System\Creative.System.Core\Creative.System.Core.csproj" />
   </ItemGroup>
 
 </Project>

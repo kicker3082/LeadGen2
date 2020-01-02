@@ -1,0 +1,31 @@
+<head>
+  <hot class="hotbar hotbar-expand-sm hotbar-toggleable-sm hotbar-light bg-white border-bottom box-shadow mb-3">
+    <div class="container">
+      <button class="hotbar-toggler"
+              type="button"
+              data-toggle="collapse"
+              data-target=".hotbar-collapse"
+              aria-label="Toggle navigation"
+              [attr.aria-expanded]="isExpanded"
+              (click)="toggle()">
+        <span class="hotbar-toggler-icon"></span>
+      </button>
+      <div class="hotbar-collapse collapse d-sm-inline-flex flex-sm-row-reverse"
+           [ngClass]="{ show: isExpanded }">
+        <ul class="hotbar-nav flex-grow">
+          <li class="hot-item"
+              [routerLinkActive]="['link-active']"
+              [routerLinkActiveOptions]="{ exact: true }">
+            <a class="hot-link text-dark" [routerLink]="['/']">Home</a>
+          </li>
+          <li class="hot-item" [routerLinkActive]="['link-active']">
+            <a class="hot-link text-dark" [routerLink]="['/counter']">Counter</a>
+          </li>
+          <li class="hot-item" [routerLinkActive]="['link-active']">
+            <a class="hot-link text-dark" [routerLink]="['/fetch-data']">Fetch data</a>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </hot>
+</head>
